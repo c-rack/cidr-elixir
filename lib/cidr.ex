@@ -1,7 +1,7 @@
 defmodule CIDR do
 
   @moduledoc """
-  
+  Classless Inter-Domain Routing (CIDR)
   """
 
   defstruct ip: { 0, 0, 0, 0 }, mask: 32
@@ -18,41 +18,37 @@ defmodule CIDR do
   end
   def is_cidr(_), do: false
 
-  def to_cidr(string) do
-	if Kernel.is_bitstring(string) do
-		tokens = String.split(string, "/")
-		if Enum.count(tokens) == 2 do
-			result = 
-				tokens
-				|> List.first
-				|> String.to_char_list
-				|> :inet.parse_address
-			is_ip_valid = 
-			case result do
-				{ :ok, _ }    -> true
-				{ :error, _ } -> false
-			end
-			parsed_netmask =
-				tokens
-				|> List.last
-				|> Integer.parse
-			netmask =
-			case parsed_netmask do
-				{ value, "" } -> value
-				_             -> false
-			end
-			is_netmask_valid_range =
-			if netmask do
-				(netmask >= 0) and (netmask <= 32)
-			else
-				false
-			end
-			if is_ip_valid and is_netmask_valid_range do
-				{ :ok, ip } = result
-				%CIDR{ ip: ip, mask: netmask }
-			else
-				false
-			end
+  def to_cidr(string) when string |> is_bitstring do
+	tokens = String.split(string, "/")
+	if Enum.count(tokens) == 2 do
+		result = 
+			tokens
+			|> List.first
+			|> String.to_char_list
+			|> :inet.parse_address
+		is_ip_valid = 
+		case result do
+			{ :ok, _ }    -> true
+			{ :error, _ } -> false
+		end
+		parsed_netmask =
+			tokens
+			|> List.last
+			|> Integer.parse
+		netmask =
+		case parsed_netmask do
+			{ value, "" } -> value
+			_             -> false
+		end
+		is_netmask_valid_range =
+		if netmask do
+			(netmask >= 0) and (netmask <= 32)
+		else
+			false
+		end
+		if is_ip_valid and is_netmask_valid_range do
+			{ :ok, ip } = result
+			%CIDR{ ip: ip, mask: netmask }
 		else
 			false
 		end
@@ -60,5 +56,6 @@ defmodule CIDR do
 		false
 	end
   end
+  def to_cidr(string), do: false
 	
 end
