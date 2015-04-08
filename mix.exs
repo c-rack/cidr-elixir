@@ -5,6 +5,7 @@ defmodule CIDR.Mixfile do
     [app: :cidr,
      version: "0.0.1",
      elixir: "~> 1.0",
+     source_url: "https://github.com/c-rack/cidr-elixir",
      deps: deps]
   end
 
