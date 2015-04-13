@@ -57,5 +57,17 @@ defmodule CIDR do
     end
   end
   def to_cidr(string), do: false
+  
+  defp regex_ip do
+    ~r/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+  end
+  
+  def parse(string) do
+    if string =~ regex_ip do
+      to_cidr(string <> "/32")
+    else
+      to_cidr(string)
+    end
+  end
 
 end
