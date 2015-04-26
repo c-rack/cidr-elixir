@@ -1,5 +1,7 @@
 defmodule CIDR do
 
+  use Bitwise
+
   @moduledoc """
   Classless Inter-Domain Routing (CIDR)
   """
@@ -17,6 +19,15 @@ defmodule CIDR do
     string |> to_cidr |> is_cidr
   end
   def is_cidr(_), do: false
+
+  @doc """
+  Checks if an IP address is in the provided CIDR.
+  """
+  def match(%CIDR{ ip: { a0, b0, c0, d0 }, mask: mask } = cidr, { a1, b1, c1, d1 } = ip) do
+    cidr_value = (a0 <<< 24) ||| (b0 <<< 16) ||| (c0 <<< 8) ||| d0
+    ip_value = (a1 <<< 24) ||| (b1 <<< 16) ||| (c1 <<< 8) ||| d1
+    (cidr_value >>> (32 - mask)) == (ip_value >>> (32 - mask))
+  end
 
   def to_cidr(string) when string |> is_bitstring do
     tokens = String.split(string, "/")

@@ -2,11 +2,15 @@ defmodule CIDR.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :cidr,
-     version: "0.0.1",
-     elixir: "~> 1.0",
-     source_url: "https://github.com/c-rack/cidr-elixir",
-     deps: deps]
+    [
+      app: :cidr,
+      version: "0.1.0",
+      elixir: ">= 1.0.2",
+      source_url: "https://github.com/c-rack/cidr-elixir",
+      deps: deps,
+      description: "Classless Inter-Domain Routing (CIDR) for Elixir",
+      package: package
+    ]
   end
 
   # Configuration for the OTP application
@@ -28,4 +32,13 @@ defmodule CIDR.Mixfile do
   defp deps do
     []
   end
+
+  defp package do
+    %{
+      contributors: ["Constantin Rack"],
+      licenses: ["MIT License"],
+      links: %{"Github" => "https://github.com/c-rack/cidr-elixir"}
+    }
+  end
+
 end
