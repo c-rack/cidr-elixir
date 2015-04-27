@@ -12,12 +12,8 @@ defmodule CIDR do
     %CIDR{ cidr | mask: mask }
   end
 
-  def is_cidr(cidr) when is_map(cidr) do
-    cidr.__struct__ == CIDR
-  end
-  def is_cidr(string) when is_bitstring(string) do
-    string |> to_cidr |> is_cidr
-  end
+  def is_cidr(cidr) when is_map(cidr), do: cidr.__struct__ == CIDR
+  def is_cidr(string) when is_bitstring(string), do: string |> parse |> is_cidr
   def is_cidr(_), do: false
 
   @doc """
@@ -28,56 +24,50 @@ defmodule CIDR do
     ip_value = (a1 <<< 24) ||| (b1 <<< 16) ||| (c1 <<< 8) ||| d1
     (cidr_value >>> (32 - mask)) == (ip_value >>> (32 - mask))
   end
+  def match(address, mask), do: false
 
-  def to_cidr(string) when string |> is_bitstring do
-    tokens = String.split(string, "/")
-    if Enum.count(tokens) == 2 do
-      result = 
-        tokens
-        |> List.first
-        |> String.to_char_list
-        |> :inet.parse_address
-      is_ip_valid = 
-        case result do
-          { :ok, _ }    -> true
-          { :error, _ } -> false
-        end
-      parsed_netmask =
-        tokens
-        |> List.last
-        |> Integer.parse
-      netmask =
-        case parsed_netmask do
-          { value, "" } -> value
-          _             -> false
-        end
-      is_netmask_valid_range =
-        if netmask do
-          (netmask >= 0) and (netmask <= 32)
-        else
-          false
-        end
-      if is_ip_valid and is_netmask_valid_range do
-        { :ok, ip } = result
-        %CIDR{ ip: ip, mask: netmask }
-      else
-        false
-      end
-    else
-      false
+  def parse(string) when string |> is_bitstring do
+    [address | mask]  = string |> String.split("/")
+    parse(address |> String.to_char_list |> :inet.parse_address, mask)
+  end
+  def parse(string), do: false
+  def parse({:error, _}, _), do: :error
+  def parse({:ok, address}, []), do: %CIDR{ ip: address, mask: address |> mask_by_ip }
+  def parse({:ok, address}, [mask]), do: parse({:ok, address}, mask |> int)
+  def parse({:ok, address}, mask) when (mask < 0) or (mask > 32), do: :error
+  def parse({:ok, address}, mask), do: %CIDR{ ip: address, mask: mask }
+  def parse(_, _), do: :error
+
+  def is_ipv6({a, b, c, d, e, f, g, h}) when
+    a in 0..65535 and
+    b in 0..65535 and
+    c in 0..65535 and
+    d in 0..65535 and
+    e in 0..65535 and
+    f in 0..65535 and
+    g in 0..65535 and
+    h in 0..65535,  do: true
+  def is_ipv6(_),   do: false
+
+  def is_ipv4({a, b, c, d}) when
+    a in 0..255 and
+    b in 0..255 and
+    c in 0..255 and
+    d in 0..255,  do: true
+  def is_ipv4(_), do: false
+
+  def mask_by_ip(address) do
+    cond do
+      address |> is_ipv4  ->  32
+      address |> is_ipv6  ->  64
+      true                ->  -1
     end
   end
-  def to_cidr(string), do: false
-  
-  defp regex_ip do
-    ~r/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
-  end
-  
-  def parse(string) do
-    if string =~ regex_ip do
-      to_cidr(string <> "/32")
-    else
-      to_cidr(string)
+
+  defp int(x) do
+    case x |> Integer.parse do
+      :error  -> -1
+      {a,_}   -> a
     end
   end
 
