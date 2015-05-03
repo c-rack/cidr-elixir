@@ -1,6 +1,8 @@
 defmodule CIDRTest do
   use ExUnit.Case
 
+  import CIDR, only: [parse: 1, min: 1, max: 1]
+
   test "127.0.0.1/32 is valid" do
     assert CIDR.is_cidr("127.0.0.1/32") == true
   end
@@ -84,6 +86,13 @@ defmodule CIDRTest do
     assert ("1.2.3.4/2"  |> CIDR.parse |> CIDR.hosts) == 1073741824
     assert ("1.2.3.4/1"  |> CIDR.parse |> CIDR.hosts) == 2147483648
     assert ("1.2.3.4/0"  |> CIDR.parse |> CIDR.hosts) == 4294967296
+  end
+  
+  test "Returns correct min/max IP addresses." do
+    assert ("1.2.3.4/24"       |> parse |> min) == { 1, 2, 3, 0 }
+    assert ("1.2.3.4/24"       |> parse |> max) == { 1, 2, 3, 255 }
+    assert ("192.168.100.0/22" |> parse |> min) == { 192, 168, 100, 0 }
+    assert ("192.168.100.0/22" |> parse |> max) == { 192, 168, 103, 255 }
   end
 
 end

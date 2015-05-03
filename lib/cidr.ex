@@ -44,6 +44,33 @@ defmodule CIDR do
   def hosts(cidr) do
     1 <<< (32 - cidr.mask)
   end
+  
+  @doc """
+  Returns the lowest IP address covered.
+  """
+  def min(%CIDR{ ip: { a, b, c, d }, mask: mask }) do
+    s   = (32 - mask)
+    x   = (((a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d) >>> s) <<< s
+    a1  = ((x >>> 24) &&& 0xFF)
+    b1  = ((x >>> 16) &&& 0xFF)
+    c1  = ((x >>>  8) &&& 0xFF)
+    d1  = ((x >>>  0) &&& 0xFF)
+    { a1, b1, c1, d1 }
+  end
+  
+  @doc """
+  Returns the highest IP address covered.
+  """
+  def max(%CIDR{ ip: { a, b, c, d }, mask: mask }) do
+    s   = (32 - mask)
+    x   = (((a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d) >>> s) <<< s
+    y   = x ||| ((1 <<< s) - 1)
+    a1  = ((y >>> 24) &&& 0xFF)
+    b1  = ((y >>> 16) &&& 0xFF)
+    c1  = ((y >>>  8) &&& 0xFF)
+    d1  = ((y >>>  0) &&& 0xFF)
+    { a1, b1, c1, d1 }
+  end
 
   def is_ipv6({a, b, c, d, e, f, g, h}) when
     a in 0..65535 and
