@@ -4,33 +4,17 @@ defmodule CIDR.Mixfile do
   def project do
     [
       app: :cidr,
-      version: "0.1.0",
+      version: "0.2.0",
       elixir: ">= 1.0.2",
       source_url: "https://github.com/c-rack/cidr-elixir",
-      deps: deps,
+      deps: [],
       description: "Classless Inter-Domain Routing (CIDR) for Elixir",
       package: package
     ]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
-  end
-
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type `mix help deps` for more examples and options
-  defp deps do
-    []
+    [applications: []]
   end
 
   defp package do
