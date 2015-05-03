@@ -19,22 +19,22 @@ defmodule CIDR do
   @doc """
   Checks if an IP address is in the provided CIDR.
   """
-  def match(%CIDR{ ip: { a0, b0, c0, d0 }, mask: mask } = cidr, { a1, b1, c1, d1 } = ip) do
+  def match(%CIDR{ ip: { a0, b0, c0, d0 }, mask: mask } = _cidr, { a1, b1, c1, d1 } = _ip) do
     cidr_value = (a0 <<< 24) ||| (b0 <<< 16) ||| (c0 <<< 8) ||| d0
     ip_value = (a1 <<< 24) ||| (b1 <<< 16) ||| (c1 <<< 8) ||| d1
     (cidr_value >>> (32 - mask)) == (ip_value >>> (32 - mask))
   end
-  def match(address, mask), do: false
+  def match(_address, _mask), do: false
 
   def parse(string) when string |> is_bitstring do
     [address | mask]  = string |> String.split("/")
     parse(address |> String.to_char_list |> :inet.parse_address, mask)
   end
-  def parse(string), do: false
+  def parse(_string), do: false
   def parse({:error, _}, _), do: :error
   def parse({:ok, address}, []), do: %CIDR{ ip: address, mask: address |> mask_by_ip }
   def parse({:ok, address}, [mask]), do: parse({:ok, address}, mask |> int)
-  def parse({:ok, address}, mask) when (mask < 0) or (mask > 32), do: :error
+  def parse({:ok, _address}, mask) when (mask < 0) or (mask > 32), do: :error
   def parse({:ok, address}, mask), do: %CIDR{ ip: address, mask: mask }
   def parse(_, _), do: :error
 
