@@ -38,6 +38,13 @@ defmodule CIDR do
   def parse({:ok, address}, mask), do: %CIDR{ ip: address, mask: mask }
   def parse(_, _), do: :error
 
+  @doc """
+  Returns the number of hosts covered.
+  """
+  def hosts(cidr) do
+    1 <<< (32 - cidr.mask)
+  end
+
   def is_ipv6({a, b, c, d, e, f, g, h}) when
     a in 0..65535 and
     b in 0..65535 and
