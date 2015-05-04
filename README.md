@@ -1,4 +1,4 @@
-# CIDR, a [Classless Inter-Domain Routing](https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing) library
+# CIDR, a [Classless Inter-Domain Routing](https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing) library for [Elixir](http://www.elixir-lang.org/)
 
 [![Hex.pm Version](http://img.shields.io/hexpm/v/cidr.svg)](https://hex.pm/packages/cidr)
 
