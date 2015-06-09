@@ -6,7 +6,7 @@ defmodule CIDR do
   Classless Inter-Domain Routing (CIDR)
   """
 
-  defstruct ip: { 0, 0, 0, 0 }, mask: 32
+  defstruct ip: nil, mask: 32
 
   def set_mask(cidr, mask) when mask in 0..32 do
     %CIDR{ cidr | mask: mask }
@@ -26,17 +26,44 @@ defmodule CIDR do
   end
   def match(_address, _mask), do: false
 
+  @doc "Parses a bitstring into a CIDR struct"
   def parse(string) when string |> is_bitstring do
     [address | mask]  = string |> String.split("/")
-    parse(address |> String.to_char_list |> :inet.parse_address, mask)
+    ip_address = address |> String.to_char_list |> :inet.parse_address
+    do_parse(ip_address, mask)
   end
-  def parse(_string), do: false
-  def parse({:error, _}, _), do: :error
-  def parse({:ok, address}, []), do: %CIDR{ ip: address, mask: address |> mask_by_ip }
-  def parse({:ok, address}, [mask]), do: parse({:ok, address}, mask |> int)
-  def parse({:ok, _address}, mask) when (mask < 0) or (mask > 32), do: :error
-  def parse({:ok, address}, mask), do: %CIDR{ ip: address, mask: mask }
-  def parse(_, _), do: :error
+  
+  @doc "Only bitstrings can be parsed"
+  def parse(_other) do
+    {:error, "Not a bitstring"}
+  end
+
+  # :inet.parse_address failed, so we pass the reason to the caller
+  defp do_parse({:error, reason}, _) do
+    {:error, reason}
+  end
+
+  # We got a simple IP address without mask
+  defp do_parse({:ok, address}, []) do
+    %CIDR{ip: address, mask: address |> mask_by_ip}
+  end
+  # We got a mask and need to convert it to integer
+  defp do_parse({:ok, address}, [mask]) do
+    do_parse({:ok, address}, mask |> int)
+  end
+  # Validate that mask in valid
+  # TODO: Add IPv6 support
+  defp do_parse({:ok, _address}, mask) when (mask < 0) or (mask > 32) do
+    {:error, "Invalid mask #{mask}"}
+  end
+  # Everything is fine
+  defp do_parse({:ok, address}, mask) do
+    %CIDR{ip: address, mask: mask}
+  end
+  # Otherwise, return error
+  defp do_parse(ip_address, mask) do
+    {:error, "Could not parse ip address #{inspect ip_address} and mask #{inspect mask}"}
+  end
 
   @doc """
   Returns the number of hosts covered.
@@ -93,7 +120,7 @@ defmodule CIDR do
   def mask_by_ip(address) do
     cond do
       address |> is_ipv4  ->  32
-      address |> is_ipv6  ->  64
+      address |> is_ipv6  -> 128
       true                ->  -1
     end
   end
