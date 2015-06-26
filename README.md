@@ -10,7 +10,7 @@ To use this library in your project, edit your mix.exs file and add cidr as a de
 ```elixir
 defp deps do
   [
-    { :cidr, "~> 0.2.0" }
+    {:cidr, "~> 0.2.0"}
   ]
 end
 ```
