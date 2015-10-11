@@ -19,7 +19,7 @@ defmodule CIDR.Mixfile do
 
   defp package do
     %{
-      contributors: ["Constantin Rack"],
+      maintainers: ["Constantin Rack"],
       licenses: ["MIT License"],
       links: %{"Github" => "https://github.com/c-rack/cidr-elixir"}
     }
