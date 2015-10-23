@@ -19,9 +19,9 @@ defmodule CIDR do
   @doc """
   Checks if an IP address is in the provided CIDR.
   """
-  def match(%CIDR{ ip: { a0, b0, c0, d0 }, mask: mask } = _cidr, { a1, b1, c1, d1 } = _ip) do
-    cidr_value = (a0 <<< 24) ||| (b0 <<< 16) ||| (c0 <<< 8) ||| d0
-    ip_value = (a1 <<< 24) ||| (b1 <<< 16) ||| (c1 <<< 8) ||| d1
+  def match(%CIDR{ip: {a, b, c, d}, mask: mask}, {e, f, g, h}) do
+    cidr_value = (a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d
+    ip_value   = (e <<< 24) ||| (f <<< 16) ||| (g <<< 8) ||| h
     (cidr_value >>> (32 - mask)) == (ip_value >>> (32 - mask))
   end
   def match(_address, _mask), do: false
@@ -98,7 +98,7 @@ defmodule CIDR do
     { a1, b1, c1, d1 }
   end
 
-  def is_ipv6({a, b, c, d, e, f, g, h}) when
+  defp is_ipv6({a, b, c, d, e, f, g, h}) do
     a in 0..65535 and
     b in 0..65535 and
     c in 0..65535 and
@@ -106,21 +106,22 @@ defmodule CIDR do
     e in 0..65535 and
     f in 0..65535 and
     g in 0..65535 and
-    h in 0..65535,  do: true
-  def is_ipv6(_),   do: false
+    h in 0..65535
+  end
+  defp is_ipv6(_), do: false
 
-  def is_ipv4({a, b, c, d}) when
+  defp is_ipv4({a, b, c, d}) do
     a in 0..255 and
     b in 0..255 and
     c in 0..255 and
-    d in 0..255,  do: true
-  def is_ipv4(_), do: false
+    d in 0..255
+  end
+  defp is_ipv4(_), do: false
 
-  def mask_by_ip(address) do
+  defp mask_by_ip(address) do
     cond do
-      address |> is_ipv4  ->  32
-      address |> is_ipv6  -> 128
-      true                ->  -1
+      is_ipv4(address) ->  32
+      is_ipv6(address) -> 128
     end
   end
 
