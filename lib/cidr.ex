@@ -32,7 +32,7 @@ defmodule CIDR do
     ip_address = address |> String.to_char_list |> :inet.parse_address
     do_parse(ip_address, mask)
   end
-  
+
   @doc "Only bitstrings can be parsed"
   def parse(_other) do
     {:error, "Not a bitstring"}
@@ -71,7 +71,7 @@ defmodule CIDR do
   def hosts(cidr) do
     1 <<< (32 - cidr.mask)
   end
-  
+
   @doc """
   Returns the lowest IP address covered.
   """
@@ -84,7 +84,7 @@ defmodule CIDR do
     d1  = ((x >>>  0) &&& 0xFF)
     { a1, b1, c1, d1 }
   end
-  
+
   @doc """
   Returns the highest IP address covered.
   """
