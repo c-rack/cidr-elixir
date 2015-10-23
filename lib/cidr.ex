@@ -12,9 +12,6 @@ defmodule CIDR do
 
   ## Examples
 
-      iex> CIDR.is_cidr?(%CIDR{ip: {192, 168, 1, 254}, mask: 32})
-      true
-
       iex> CIDR.is_cidr?("192.168.1.254/32")
       true
   """
@@ -72,10 +69,10 @@ defmodule CIDR do
 
   # We got a simple IP address without mask
   defp parse(address, []) when tuple_size(address) == 4 do
-    create(min(address, mask), max(address, mask), 32, hosts(:ipv4, mask))
+    create(address, address, 32, hosts(:ipv4, 32))
   end
   defp parse(address, []) when tuple_size(address) == 8 do
-    create(min(address, mask), max(address, mask), 128, hosts(:ipv4, mask))
+    create(address, address, 128, hosts(:ipv4, 128))
   end
   # We got a mask and need to convert it to integer
   defp parse(address, [mask]) do
@@ -88,26 +85,26 @@ defmodule CIDR do
     {:error, "Invalid mask #{mask}"}
   end
   defp parse(address, mask) when
-      tuple_size(address) 8 and
+      tuple_size(address) == 8 and
       (mask < 0) or (mask > 128) do
     {:error, "Invalid mask #{mask}"}
   end
   # Everything is fine
   defp parse(address, mask) when tuple_size(address) == 4 do
-    create(min(address, mask), max(address, mask), mask, hosts(:ipv4, mask))
+    create(start_address(address, mask), end_address(address, mask), mask, hosts(:ipv4, mask))
   end
   defp parse(address, mask) when tuple_size(address) == 6 do
-    create(min(address, mask), max(address, mask), mask, hosts(:ipv6, mask))
+    create(start_address(address, mask), end_address(address, mask), mask, hosts(:ipv6, mask))
   end
 
   defp parse_address(address) do
     ip_address = address |> String.to_char_list |> :inet.parse_address
   end
 
-  defp create(start, end, mask, hosts) do
+  defp create(start, last, mask, hosts) do
     %CIDR{
       start: start,
-      end:   end,
+      end:   last,
       mask:  mask,
       hosts: hosts
     }
@@ -120,7 +117,7 @@ defmodule CIDR do
     1 <<< (128 - mask)
   end
 
-  defp min({a, b, c, d}, mask) do
+  defp start_address({a, b, c, d}, mask) do
     s   = (32 - mask)
     x   = (((a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d) >>> s) <<< s
     a1  = ((x >>> 24) &&& 0xFF)
@@ -130,7 +127,7 @@ defmodule CIDR do
     { a1, b1, c1, d1 }
   end
 
-  defp max({a, b, c, d}, mask) do
+  defp end_address({a, b, c, d}, mask) do
     s   = (32 - mask)
     x   = (((a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d) >>> s) <<< s
     y   = x ||| ((1 <<< s) - 1)
