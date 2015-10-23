@@ -60,9 +60,6 @@ defmodule CIDR do
   defp parse(address, mask) do
     %CIDR{ip: address, mask: mask}
   end
-  defp parse(address, mask) do
-    {:error, "Could not parse: #{:inet.ntoa(address)}/#{inspect mask}"}
-  end
 
   @doc """
   Returns the number of hosts covered.
