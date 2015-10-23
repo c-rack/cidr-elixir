@@ -1,5 +1,6 @@
 defmodule CIDRTest do
   use ExUnit.Case
+  doctest CIDR
 
   import CIDR, only: [parse: 1, min: 1, max: 1]
 

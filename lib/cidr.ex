@@ -8,6 +8,14 @@ defmodule CIDR do
 
   defstruct ip: nil, mask: 32
 
+  @doc """
+  Set the `mask` of a `cidr` struct.
+
+  ## Examples
+
+      iex> CIDR.set_mask(%CIDR{ip: {192, 168, 1, 254}, mask: 32}, 16)
+      %CIDR{ip: {192, 168, 1, 254}, mask: 16}
+  """
   def set_mask(cidr, mask) when mask in 0..32 do
     %CIDR{ cidr | mask: mask }
   end
