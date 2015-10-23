@@ -26,43 +26,42 @@ defmodule CIDR do
   end
   def match(_address, _mask), do: false
 
-  @doc "Parses a bitstring into a CIDR struct"
+  @doc """
+  Parses a bitstring into a CIDR struct
+  """
   def parse(string) when string |> is_bitstring do
     [address | mask]  = string |> String.split("/")
     ip_address = address |> String.to_char_list |> :inet.parse_address
-    do_parse(ip_address, mask)
-  end
 
-  @doc "Only bitstrings can be parsed"
+    case ip_address do
+      {:ok, address}   -> parse(address, mask)
+      {:error, reason} -> {:error, reason}
+    end
+  end
+  # Only bitstrings can be parsed
   def parse(_other) do
     {:error, "Not a bitstring"}
   end
 
-  # :inet.parse_address failed, so we pass the reason to the caller
-  defp do_parse({:error, reason}, _) do
-    {:error, reason}
-  end
-
   # We got a simple IP address without mask
-  defp do_parse({:ok, address}, []) do
+  defp parse(address, []) do
     %CIDR{ip: address, mask: address |> mask_by_ip}
   end
   # We got a mask and need to convert it to integer
-  defp do_parse({:ok, address}, [mask]) do
-    do_parse({:ok, address}, mask |> int)
+  defp parse(address, [mask]) do
+    parse(address, mask |> int)
   end
   # Validate that mask in valid
   # TODO: Add IPv6 support
-  defp do_parse({:ok, _address}, mask) when (mask < 0) or (mask > 32) do
+  defp parse(_address, mask) when (mask < 0) or (mask > 32) do
     {:error, "Invalid mask #{mask}"}
   end
   # Everything is fine
-  defp do_parse({:ok, address}, mask) do
+  defp parse(address, mask) do
     %CIDR{ip: address, mask: mask}
   end
-  # Otherwise, return error
-  defp do_parse(ip_address, mask) do
-    {:error, "Could not parse ip address #{inspect ip_address} and mask #{inspect mask}"}
+  defp parse(address, mask) do
+    {:error, "Could not parse: #{:inet.ntoa(address)}/#{inspect mask}"}
   end
 
   @doc """
