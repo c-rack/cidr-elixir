@@ -81,19 +81,19 @@ defmodule CIDR do
   # Validate that mask is valid
   defp parse(address, mask) when
       tuple_size(address) == 4 and
-      (mask < 0) or (mask > 32) do
+      ((mask < 0) or (mask > 32)) do
     {:error, "Invalid mask #{mask}"}
   end
   defp parse(address, mask) when
       tuple_size(address) == 8 and
-      (mask < 0) or (mask > 128) do
+      ((mask < 0) or (mask > 128)) do
     {:error, "Invalid mask #{mask}"}
   end
   # Everything is fine
   defp parse(address, mask) when tuple_size(address) == 4 do
     create(start_address(address, mask), end_address(address, mask), mask, hosts(:ipv4, mask))
   end
-  defp parse(address, mask) when tuple_size(address) == 6 do
+  defp parse(address, mask) when tuple_size(address) == 8 do
     create(start_address(address, mask), end_address(address, mask), mask, hosts(:ipv6, mask))
   end
 
@@ -126,6 +126,19 @@ defmodule CIDR do
     d1  = ((x >>>  0) &&& 0xFF)
     { a1, b1, c1, d1 }
   end
+  defp start_address({a, b, c, d, e, f, g, h}, mask) do
+    s   = (128 - mask)
+    x   = (((a <<< 112) ||| (b <<< 96) ||| (c <<< 80) ||| (d <<< 64) ||| (e <<< 48) ||| (f <<< 32) ||| (g <<< 16) ||| h) >>> s) <<< s
+    a1  = ((x >>> 112) &&& 0xFFFF)
+    b1  = ((x >>>  96) &&& 0xFFFF)
+    c1  = ((x >>>  80) &&& 0xFFFF)
+    d1  = ((x >>>  64) &&& 0xFFFF)
+    e1  = ((x >>>  48) &&& 0xFFFF)
+    f1  = ((x >>>  32) &&& 0xFFFF)
+    g1  = ((x >>>  16) &&& 0xFFFF)
+    h1  = ((x >>>   0) &&& 0xFFFF)
+    { a1, b1, c1, d1, e1, f1, g1, h1 }
+  end
 
   defp end_address({a, b, c, d}, mask) do
     s   = (32 - mask)
@@ -136,6 +149,20 @@ defmodule CIDR do
     c1  = ((y >>>  8) &&& 0xFF)
     d1  = ((y >>>  0) &&& 0xFF)
     { a1, b1, c1, d1 }
+  end
+  defp end_address({a, b, c, d, e, f, g, h}, mask) do
+    s   = (128 - mask)
+    x   = (((a <<< 112) ||| (b <<< 96) ||| (c <<< 80) ||| (d <<< 64) ||| (e <<< 48) ||| (f <<< 32) ||| (g <<< 16) ||| h) >>> s) <<< s
+    y   = x ||| ((1 <<< s) - 1)
+    a1  = ((y >>> 112) &&& 0xFFFF)
+    b1  = ((y >>>  96) &&& 0xFFFF)
+    c1  = ((y >>>  80) &&& 0xFFFF)
+    d1  = ((y >>>  64) &&& 0xFFFF)
+    e1  = ((y >>>  48) &&& 0xFFFF)
+    f1  = ((y >>>  32) &&& 0xFFFF)
+    g1  = ((y >>>  16) &&& 0xFFFF)
+    h1  = ((y >>>   0) &&& 0xFFFF)
+    { a1, b1, c1, d1, e1, f1, g1, h1 }
   end
 
   defp is_ipv6({a, b, c, d, e, f, g, h}) do
