@@ -76,9 +76,15 @@ defmodule CIDR do
   defp parse(address, [mask]) do
     parse(address, mask |> int)
   end
-  # Validate that mask in valid
-  # TODO: Add IPv6 support
-  defp parse(_address, mask) when (mask < 0) or (mask > 32) do
+  # Validate that mask is valid
+  defp parse(address, mask) when
+      tuple_size(address) == 4 and
+      (mask < 0) or (mask > 32) do
+    {:error, "Invalid mask #{mask}"}
+  end
+  defp parse(address, mask) when
+      tuple_size(address) 8 and
+      (mask < 0) or (mask > 128) do
     {:error, "Invalid mask #{mask}"}
   end
   # Everything is fine
