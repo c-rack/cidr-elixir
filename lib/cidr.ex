@@ -20,9 +20,26 @@ defmodule CIDR do
     %CIDR{ cidr | mask: mask }
   end
 
-  def is_cidr(cidr) when is_map(cidr), do: cidr.__struct__ == CIDR
-  def is_cidr(string) when is_bitstring(string), do: string |> parse |> is_cidr
-  def is_cidr(_), do: false
+  @doc """
+  Check whether the argument is a CIDR value.
+
+  ## Examples
+
+      iex> CIDR.is_cidr?(%CIDR{ip: {192, 168, 1, 254}, mask: 32})
+      true
+
+      iex> CIDR.is_cidr?("192.168.1.254/32")
+      true
+  """
+  def is_cidr?(cidr) when is_map(cidr) do
+    cidr.__struct__ == CIDR
+  end
+  def is_cidr?(string) when is_bitstring(string) do
+    string
+    |> parse
+    |> is_cidr?
+  end
+  def is_cidr?(_), do: false
 
   @doc """
   Checks if an IP address is in the provided CIDR.

@@ -5,39 +5,39 @@ defmodule CIDRTest do
   import CIDR, only: [parse: 1, min: 1, max: 1]
 
   test "127.0.0.1/32 is valid" do
-    assert CIDR.is_cidr("127.0.0.1/32") == true
+    assert CIDR.is_cidr?("127.0.0.1/32") == true
   end
 
   test "127.0.0.1/64 is invalid" do
-    assert CIDR.is_cidr("127.0.0.1/64") == false
+    assert CIDR.is_cidr?("127.0.0.1/64") == false
   end
 
   test "127.0.0.1/test is invalid" do
-    assert CIDR.is_cidr("127.0.0.1/test") == false
+    assert CIDR.is_cidr?("127.0.0.1/test") == false
   end
 
   test "test/32 is invalid" do
-    assert CIDR.is_cidr("test/32") == false
+    assert CIDR.is_cidr?("test/32") == false
   end
 
   test "127.0.0.1/32/64 is invalid" do
-    assert CIDR.is_cidr("127.0.0.1/32/64") == false
+    assert CIDR.is_cidr?("127.0.0.1/32/64") == false
   end
 
   test "false is invalid" do
-    assert CIDR.is_cidr(false) == false
+    assert CIDR.is_cidr?(false) == false
   end
 
   test "Parse 127.0.0.1" do
-    assert "127.0.0.1" |> CIDR.parse |> CIDR.is_cidr
+    assert "127.0.0.1" |> CIDR.parse |> CIDR.is_cidr?
   end
 
   test "Parse 127.0.0.1/24" do
-    assert "127.0.0.1/24" |> CIDR.parse |> CIDR.is_cidr
+    assert "127.0.0.1/24" |> CIDR.parse |> CIDR.is_cidr?
   end
 
   # Match
-  
+
   test "Matches exactly" do
     assert ("1.2.3.4" |> CIDR.parse |> CIDR.match({1, 1, 1, 1})) == false
     assert ("1.2.3.4" |> CIDR.parse |> CIDR.match({1, 2, 3, 3})) == false
@@ -45,14 +45,14 @@ defmodule CIDRTest do
     assert ("1.2.3.4" |> CIDR.parse |> CIDR.match({1, 2, 3, 5})) == false
     assert ("1.2.3.4" |> CIDR.parse |> CIDR.match({255, 255, 255, 255})) == false
   end
-  
+
   test "Matches /24" do
     assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 1})
     assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 100})
     assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 200})
     assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 255})
   end
-  
+
   test "Returns number of hosts" do
     assert ("1.2.3.4/32" |> CIDR.parse |> CIDR.hosts) == 1
     assert ("1.2.3.4/31" |> CIDR.parse |> CIDR.hosts) == 2
@@ -88,7 +88,7 @@ defmodule CIDRTest do
     assert ("1.2.3.4/1"  |> CIDR.parse |> CIDR.hosts) == 2147483648
     assert ("1.2.3.4/0"  |> CIDR.parse |> CIDR.hosts) == 4294967296
   end
-  
+
   test "Returns correct min/max IP addresses." do
     assert ("1.2.3.4/24"       |> parse |> min) == { 1, 2, 3, 0 }
     assert ("1.2.3.4/24"       |> parse |> max) == { 1, 2, 3, 255 }
