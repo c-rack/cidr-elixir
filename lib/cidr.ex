@@ -65,7 +65,7 @@ defmodule CIDR do
   Returns the number of hosts covered.
   """
   def hosts(cidr) do
-    1 <<< (32 - cidr.mask)
+    1 <<< (mask_by_ip(cidr.ip) - cidr.mask)
   end
 
   @doc """
