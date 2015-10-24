@@ -1,81 +1,123 @@
 defmodule CIDR do
-
   use Bitwise
 
   @moduledoc """
   Classless Inter-Domain Routing (CIDR)
   """
 
-  defstruct ip: nil, mask: 32
+  defstruct start: nil, end: nil, mask: nil, hosts: nil
 
-  def set_mask(cidr, mask) when mask in 0..32 do
-    %CIDR{ cidr | mask: mask }
+  @doc """
+  Check whether the argument is a CIDR value.
+
+  ## Examples
+
+      iex> CIDR.is_cidr?("192.168.1.254/32")
+      true
+  """
+  def is_cidr?(cidr) when is_map(cidr) do
+    cidr.__struct__ == CIDR
   end
-
-  def is_cidr(cidr) when is_map(cidr), do: cidr.__struct__ == CIDR
-  def is_cidr(string) when is_bitstring(string), do: string |> parse |> is_cidr
-  def is_cidr(_), do: false
+  def is_cidr?(string) when is_bitstring(string) do
+    string
+    |> parse
+    |> is_cidr?
+  end
+  def is_cidr?(_), do: false
 
   @doc """
   Checks if an IP address is in the provided CIDR.
   """
-  def match(%CIDR{ ip: { a0, b0, c0, d0 }, mask: mask } = _cidr, { a1, b1, c1, d1 } = _ip) do
-    cidr_value = (a0 <<< 24) ||| (b0 <<< 16) ||| (c0 <<< 8) ||| d0
-    ip_value = (a1 <<< 24) ||| (b1 <<< 16) ||| (c1 <<< 8) ||| d1
-    (cidr_value >>> (32 - mask)) == (ip_value >>> (32 - mask))
+  def match(cidr, address) when is_binary(address) do
+    ip = parse_address(address)
+    match(cidr, ip)
+  end
+  def match(%CIDR{start: {a, b, c, d}, end: {e, f, g, h}}, {i, j, k, l}) do
+    i in a..e and
+    j in b..f and
+    k in c..g and
+    l in d..h
+  end
+  def match(%CIDR{start: {a, b, c, d, e, f, g, h}, end: {i, j, k, l, m, n, o, p}}, {q, r, s, t, u, v, w, x}) do
+    q in a..i and
+    r in b..j and
+    s in c..k and
+    t in d..l and
+    u in e..m and
+    v in f..n and
+    w in g..o and
+    x in h..p
   end
   def match(_address, _mask), do: false
 
-  @doc "Parses a bitstring into a CIDR struct"
+  @doc """
+  Parses a bitstring into a CIDR struct
+  """
   def parse(string) when string |> is_bitstring do
     [address | mask]  = string |> String.split("/")
-    ip_address = address |> String.to_char_list |> :inet.parse_address
-    do_parse(ip_address, mask)
+    ip_address = parse_address(address)
+
+    case ip_address do
+      {:ok, address}   -> parse(address, mask)
+      {:error, reason} -> {:error, reason}
+    end
   end
-  
-  @doc "Only bitstrings can be parsed"
+  # Only bitstrings can be parsed
   def parse(_other) do
     {:error, "Not a bitstring"}
   end
 
-  # :inet.parse_address failed, so we pass the reason to the caller
-  defp do_parse({:error, reason}, _) do
-    {:error, reason}
-  end
-
   # We got a simple IP address without mask
-  defp do_parse({:ok, address}, []) do
-    %CIDR{ip: address, mask: address |> mask_by_ip}
+  defp parse(address, []) when tuple_size(address) == 4 do
+    create(address, address, 32, hosts(:ipv4, 32))
+  end
+  defp parse(address, []) when tuple_size(address) == 8 do
+    create(address, address, 128, hosts(:ipv4, 128))
   end
   # We got a mask and need to convert it to integer
-  defp do_parse({:ok, address}, [mask]) do
-    do_parse({:ok, address}, mask |> int)
+  defp parse(address, [mask]) do
+    parse(address, mask |> int)
   end
-  # Validate that mask in valid
-  # TODO: Add IPv6 support
-  defp do_parse({:ok, _address}, mask) when (mask < 0) or (mask > 32) do
+  # Validate that mask is valid
+  defp parse(address, mask) when
+      tuple_size(address) == 4 and
+      ((mask < 0) or (mask > 32)) do
+    {:error, "Invalid mask #{mask}"}
+  end
+  defp parse(address, mask) when
+      tuple_size(address) == 8 and
+      ((mask < 0) or (mask > 128)) do
     {:error, "Invalid mask #{mask}"}
   end
   # Everything is fine
-  defp do_parse({:ok, address}, mask) do
-    %CIDR{ip: address, mask: mask}
+  defp parse(address, mask) when tuple_size(address) == 4 do
+    create(start_address(address, mask), end_address(address, mask), mask, hosts(:ipv4, mask))
   end
-  # Otherwise, return error
-  defp do_parse(ip_address, mask) do
-    {:error, "Could not parse ip address #{inspect ip_address} and mask #{inspect mask}"}
+  defp parse(address, mask) when tuple_size(address) == 8 do
+    create(start_address(address, mask), end_address(address, mask), mask, hosts(:ipv6, mask))
   end
 
-  @doc """
-  Returns the number of hosts covered.
-  """
-  def hosts(cidr) do
-    1 <<< (32 - cidr.mask)
+  defp parse_address(address) do
+    ip_address = address |> String.to_char_list |> :inet.parse_address
   end
-  
-  @doc """
-  Returns the lowest IP address covered.
-  """
-  def min(%CIDR{ ip: { a, b, c, d }, mask: mask }) do
+
+  defp create(start, last, mask, hosts) do
+    %CIDR{
+      start: start,
+      end:   last,
+      mask:  mask,
+      hosts: hosts
+    }
+  end
+
+  defp hosts(:ipv4, mask) do
+    1 <<< (32 - mask)
+  end
+  defp hosts(:ipv6, mask) do
+    1 <<< (128 - mask)
+  end
+
+  defp start_address({a, b, c, d}, mask) do
     s   = (32 - mask)
     x   = (((a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d) >>> s) <<< s
     a1  = ((x >>> 24) &&& 0xFF)
@@ -84,11 +126,21 @@ defmodule CIDR do
     d1  = ((x >>>  0) &&& 0xFF)
     { a1, b1, c1, d1 }
   end
-  
-  @doc """
-  Returns the highest IP address covered.
-  """
-  def max(%CIDR{ ip: { a, b, c, d }, mask: mask }) do
+  defp start_address({a, b, c, d, e, f, g, h}, mask) do
+    s   = (128 - mask)
+    x   = (((a <<< 112) ||| (b <<< 96) ||| (c <<< 80) ||| (d <<< 64) ||| (e <<< 48) ||| (f <<< 32) ||| (g <<< 16) ||| h) >>> s) <<< s
+    a1  = ((x >>> 112) &&& 0xFFFF)
+    b1  = ((x >>>  96) &&& 0xFFFF)
+    c1  = ((x >>>  80) &&& 0xFFFF)
+    d1  = ((x >>>  64) &&& 0xFFFF)
+    e1  = ((x >>>  48) &&& 0xFFFF)
+    f1  = ((x >>>  32) &&& 0xFFFF)
+    g1  = ((x >>>  16) &&& 0xFFFF)
+    h1  = ((x >>>   0) &&& 0xFFFF)
+    { a1, b1, c1, d1, e1, f1, g1, h1 }
+  end
+
+  defp end_address({a, b, c, d}, mask) do
     s   = (32 - mask)
     x   = (((a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d) >>> s) <<< s
     y   = x ||| ((1 <<< s) - 1)
@@ -98,8 +150,22 @@ defmodule CIDR do
     d1  = ((y >>>  0) &&& 0xFF)
     { a1, b1, c1, d1 }
   end
+  defp end_address({a, b, c, d, e, f, g, h}, mask) do
+    s   = (128 - mask)
+    x   = (((a <<< 112) ||| (b <<< 96) ||| (c <<< 80) ||| (d <<< 64) ||| (e <<< 48) ||| (f <<< 32) ||| (g <<< 16) ||| h) >>> s) <<< s
+    y   = x ||| ((1 <<< s) - 1)
+    a1  = ((y >>> 112) &&& 0xFFFF)
+    b1  = ((y >>>  96) &&& 0xFFFF)
+    c1  = ((y >>>  80) &&& 0xFFFF)
+    d1  = ((y >>>  64) &&& 0xFFFF)
+    e1  = ((y >>>  48) &&& 0xFFFF)
+    f1  = ((y >>>  32) &&& 0xFFFF)
+    g1  = ((y >>>  16) &&& 0xFFFF)
+    h1  = ((y >>>   0) &&& 0xFFFF)
+    { a1, b1, c1, d1, e1, f1, g1, h1 }
+  end
 
-  def is_ipv6({a, b, c, d, e, f, g, h}) when
+  defp is_ipv6({a, b, c, d, e, f, g, h}) do
     a in 0..65535 and
     b in 0..65535 and
     c in 0..65535 and
@@ -107,21 +173,22 @@ defmodule CIDR do
     e in 0..65535 and
     f in 0..65535 and
     g in 0..65535 and
-    h in 0..65535,  do: true
-  def is_ipv6(_),   do: false
+    h in 0..65535
+  end
+  defp is_ipv6(_), do: false
 
-  def is_ipv4({a, b, c, d}) when
+  defp is_ipv4({a, b, c, d}) do
     a in 0..255 and
     b in 0..255 and
     c in 0..255 and
-    d in 0..255,  do: true
-  def is_ipv4(_), do: false
+    d in 0..255
+  end
+  defp is_ipv4(_), do: false
 
-  def mask_by_ip(address) do
+  defp mask_by_ip(address) do
     cond do
-      address |> is_ipv4  ->  32
-      address |> is_ipv6  -> 128
-      true                ->  -1
+      is_ipv4(address) ->  32
+      is_ipv6(address) -> 128
     end
   end
 
