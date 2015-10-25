@@ -29,7 +29,7 @@ defmodule CIDR do
   Checks if an IP address is in the provided CIDR.
   """
   def match(cidr, address) when is_binary(address) do
-    ip = parse_address(address)
+    {:ok, ip} = parse_address(address)
     match(cidr, ip)
   end
   def match(%CIDR{start: {a, b, c, d}, end: {e, f, g, h}}, {i, j, k, l}) do
@@ -98,7 +98,7 @@ defmodule CIDR do
   end
 
   defp parse_address(address) do
-    ip_address = address |> String.to_char_list |> :inet.parse_address
+    address |> String.to_char_list |> :inet.parse_address
   end
 
   defp create(start, last, mask, hosts) do

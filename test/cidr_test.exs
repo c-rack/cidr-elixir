@@ -2,8 +2,6 @@ defmodule CIDRTest do
   use ExUnit.Case
   doctest CIDR
 
-  import CIDR
-
   test "127.0.0.1/32 is valid" do
     assert CIDR.is_cidr?("127.0.0.1/32") == true
   end
@@ -51,5 +49,9 @@ defmodule CIDRTest do
     assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 100})
     assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 200})
     assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 255})
+  end
+
+  test "Match can also take a binary" do
+    assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match("1.2.3.9")
   end
 end
