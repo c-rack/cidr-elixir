@@ -42,20 +42,25 @@ iex(3)> cidr.hosts
 And use it to see if other IP addresses fall in the same range:
 
 ```elixir
-iex(4)> cidr |> CIDR.match({1,2,3,100})
+iex(4)> cidr |> CIDR.match!({1,2,3,100})
 true
-iex(5)> cidr |> CIDR.match({1,2,4,1})
+iex(5)> cidr |> CIDR.match!({1,2,4,1})
 false
 ```
 
 The match function also supports IP strings:
 
 ```elixir
-iex(6)> cidr |> CIDR.match("1.2.3.100")
+iex(6)> cidr |> CIDR.match!("1.2.3.100")
 true
-iex(7)> cidr |> CIDR.match("1.2.4.1")
+iex(7)> cidr |> CIDR.match!("1.2.4.1")
 false
 ```
+
+Keep in mind that `match!/2` throws an ArgumentError when you pass in a value
+that does not represent a valid IP address or when you try to match an IPv4
+address with an IPv6 range and vice-versa. We also provide `match/2`, a non-
+throwing interface that returns tagged tuples.
 
 ## Contribution Process
 
