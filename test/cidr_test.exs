@@ -36,22 +36,51 @@ defmodule CIDRTest do
 
   # Match
 
-  test "Matches exactly" do
-    assert ("1.2.3.4" |> CIDR.parse |> CIDR.match({1, 1, 1, 1})) == false
-    assert ("1.2.3.4" |> CIDR.parse |> CIDR.match({1, 2, 3, 3})) == false
-    assert "1.2.3.4" |> CIDR.parse |> CIDR.match({1, 2, 3, 4})
-    assert ("1.2.3.4" |> CIDR.parse |> CIDR.match({1, 2, 3, 5})) == false
-    assert ("1.2.3.4" |> CIDR.parse |> CIDR.match({255, 255, 255, 255})) == false
+  test "Match implied /32" do
+    cidr = CIDR.parse("1.2.3.4")
+
+    assert CIDR.match(cidr, {1, 1, 1, 1}) == {:ok, false}
+    assert CIDR.match(cidr, {1, 2, 3, 3}) == {:ok, false}
+    assert CIDR.match(cidr, {1, 2, 3, 4}) == {:ok, true}
+    assert CIDR.match(cidr, {1, 2, 3, 5}) == {:ok, false}
+    assert CIDR.match(cidr, {255, 255, 255, 255}) == {:ok, false}
   end
 
-  test "Matches /24" do
-    assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 1})
-    assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 100})
-    assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 200})
-    assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match({1, 2, 3, 255})
+  test "Match /24" do
+    cidr = CIDR.parse("1.2.3.4/24")
+
+    assert CIDR.match(cidr, {1, 2, 3, 1}) == {:ok, true}
+    assert CIDR.match(cidr, {1, 2, 3, 100}) == {:ok, true}
+    assert CIDR.match(cidr, {1, 2, 3, 200}) == {:ok, true}
+    assert CIDR.match(cidr, {1, 2, 3, 255}) == {:ok, true}
   end
 
-  test "Match can also take a binary" do
-    assert "1.2.3.4/24" |> CIDR.parse |> CIDR.match("1.2.3.9")
+  test "Match binaries" do
+    cidr = CIDR.parse("1.2.3.4/24")
+
+    assert CIDR.match(cidr, "1.2.3.9") == {:ok, true}
+    assert CIDR.match(cidr, "1.2.3.254") == {:ok, true}
+  end
+
+  test "Match error handling" do
+    cidr = CIDR.parse("1.2.3.4/24")
+
+    assert CIDR.match(cidr, {1,2,3,257}) == {:error, "Tuple is not a valid IP address."}
+    assert CIDR.match(cidr, {0, 0, 0, 0, 0, 0, 0, 100000}) == {:error, "Argument must be a binary or IP tuple of the same protocol."}
+    assert CIDR.match(cidr, "This is not an IP") == {:error, "Binary is not a valid IP address."}
+  end
+
+  test "Match! error handling" do
+    cidr = CIDR.parse("1.2.3.4/24")
+
+    assert_raise ArgumentError, "Tuple is not a valid IP address.", fn ->
+      CIDR.match!(cidr, {1,2,3,257})
+    end
+    assert_raise ArgumentError, "Argument must be a binary or IP tuple of the same protocol.", fn ->
+      CIDR.match!(cidr, {0, 0, 0, 0, 0, 0, 0, 100000})
+    end
+    assert_raise ArgumentError, "Binary is not a valid IP address.", fn ->
+      CIDR.match!(cidr, "This is not an IP")
+    end
   end
 end

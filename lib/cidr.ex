@@ -27,28 +27,58 @@ defmodule CIDR do
 
   @doc """
   Checks if an IP address is in the provided CIDR.
+
+  Returns `{:ok, true}` if the address is in the CIDR range, {:ok, false} if
+  it's not, and `{:error, reason}` if the second argument isn't a valid IP
+  address.
   """
   def match(cidr, address) when is_binary(address) do
-    {:ok, ip} = parse_address(address)
-    match(cidr, ip)
+    case parse_address(address) do
+      {:ok,    ip}     -> match(cidr, ip)
+      {:error, reason} -> {:error, "Binary is not a valid IP address."}
+    end
   end
-  def match(%CIDR{start: {a, b, c, d}, end: {e, f, g, h}}, {i, j, k, l}) do
-    i in a..e and
-    j in b..f and
-    k in c..g and
-    l in d..h
+  def match(%CIDR{start: {a, b, c, d}, end: {e, f, g, h}}, address = {i, j, k, l}) do
+    if is_ipv4(address) do
+      match =
+        i in a..e and
+        j in b..f and
+        k in c..g and
+        l in d..h
+      {:ok, match}
+    else
+      {:error, "Tuple is not a valid IP address."}
+    end
   end
-  def match(%CIDR{start: {a, b, c, d, e, f, g, h}, end: {i, j, k, l, m, n, o, p}}, {q, r, s, t, u, v, w, x}) do
-    q in a..i and
-    r in b..j and
-    s in c..k and
-    t in d..l and
-    u in e..m and
-    v in f..n and
-    w in g..o and
-    x in h..p
+  def match(%CIDR{start: {a, b, c, d, e, f, g, h}, end: {i, j, k, l, m, n, o, p}},
+            address = {q, r, s, t, u, v, w, x}) do
+    if is_ipv6(address) do
+      match =
+        q in a..i and
+        r in b..j and
+        s in c..k and
+        t in d..l and
+        u in e..m and
+        v in f..n and
+        w in g..o and
+        x in h..p
+      {:ok, match}
+    else
+      {:error, "Tuple is not a valid IP address."}
+    end
   end
-  def match(_address, _mask), do: false
+  def match(_address, _mask),
+    do: {:error, "Argument must be a binary or IP tuple of the same protocol."}
+
+  @doc """
+  Throwing version of match/2, raises `ArgumentError` on error.
+  """
+  def match!(cidr, address) do
+    case match(cidr, address) do
+      {:ok,    match}  -> match
+      {:error, reason} -> raise ArgumentError, message: reason
+    end
+  end
 
   @doc """
   Parses a bitstring into a CIDR struct
