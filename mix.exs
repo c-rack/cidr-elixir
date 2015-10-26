@@ -4,7 +4,7 @@ defmodule CIDR.Mixfile do
   def project do
     [
       app: :cidr,
-      version: "0.2.0",
+      version: "0.3.0",
       elixir: ">= 1.0.2",
       source_url: "https://github.com/c-rack/cidr-elixir",
       deps: [],
@@ -19,7 +19,10 @@ defmodule CIDR.Mixfile do
 
   defp package do
     %{
-      maintainers: ["Constantin Rack"],
+      maintainers: [
+        "Constantin Rack",
+        "Laurens Duijvesteijn"
+      ],
       licenses: ["MIT License"],
       links: %{"Github" => "https://github.com/c-rack/cidr-elixir"}
     }
