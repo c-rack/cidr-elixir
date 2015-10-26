@@ -9,6 +9,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - `match/2` return type
+- `%CIDR{}` struct
+- `min/1` and `max/1` are now private
+- min/max values are now stored directly in CIDR struct 
 
 ## [0.2.0] - 2015-05-03
 ### Added
