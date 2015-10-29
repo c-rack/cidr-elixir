@@ -8,8 +8,9 @@ defmodule CIDR.Mixfile do
       app: :cidr,
       elixir: ">= 1.0.2",
       deps: [
-        {:earmark, "~> 0.1",  only: [:dev, :docs]},
-        {:ex_doc,  "~> 0.10", only: [:dev, :docs]},
+        {:earmark,     "~> 0.1",  only: [:dev, :docs]},
+        {:ex_doc,      "~> 0.10", only: [:dev, :docs]},
+        {:excoveralls, "~> 0.4",  only: [:dev, :test]},
       ],
       description: "Classless Inter-Domain Routing (CIDR) for Elixir",
       docs: [
@@ -18,6 +19,7 @@ defmodule CIDR.Mixfile do
         source_url: "https://github.com/c-rack/cidr-elixir"
       ],
       package: package,
+      test_coverage: [tool: ExCoveralls],
       version: @version
     ]
   end
