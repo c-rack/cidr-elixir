@@ -215,13 +215,6 @@ defmodule CIDR do
   end
   defp is_ipv4(_), do: false
 
-  defp mask_by_ip(address) do
-    cond do
-      is_ipv4(address) ->  32
-      is_ipv6(address) -> 128
-    end
-  end
-
   defp int(x) do
     case x |> Integer.parse do
       :error  -> -1
