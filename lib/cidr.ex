@@ -35,7 +35,7 @@ defmodule CIDR do
   def match(cidr, address) when is_binary(address) do
     case parse_address(address) do
       {:ok,    ip}     -> match(cidr, ip)
-      {:error, reason} -> {:error, "Binary is not a valid IP address."}
+      {:error, reason} -> {:error, reason}
     end
   end
   def match(%CIDR{start: {a, b, c, d}, end: {e, f, g, h}}, address = {i, j, k, l}) do
