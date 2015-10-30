@@ -2,6 +2,7 @@
 
 [![Hex.pm Version](http://img.shields.io/hexpm/v/cidr.svg)](https://hex.pm/packages/cidr)
 [![Build Status](https://travis-ci.org/c-rack/cidr-elixir.png?branch=master)](https://travis-ci.org/c-rack/cidr-elixir)
+[![Coverage Status](https://coveralls.io/repos/c-rack/cidr-elixir/badge.svg?branch=&service=github)](https://coveralls.io/github/c-rack/cidr-elixir?branch=)
 
 [Classless Inter-Domain Routing](https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
 (CIDR) utilities for [Elixir](http://www.elixir-lang.org/)
