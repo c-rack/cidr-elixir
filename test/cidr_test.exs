@@ -36,6 +36,12 @@ defmodule CIDRTest do
 
   # Match
 
+  test "Match IPv6" do
+    cidr = CIDR.parse("::1")
+    assert CIDR.match(cidr, {1, 1, 1, 1, 1, 1, 1, 1}) == {:ok, false}
+    assert CIDR.match(cidr, {0, 0, 0, 0, 0, 0, 0, 1}) == {:ok, true}
+  end
+
   test "Match implied /32" do
     cidr = CIDR.parse("1.2.3.4")
 
