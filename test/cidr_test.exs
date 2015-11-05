@@ -34,6 +34,13 @@ defmodule CIDRTest do
     assert "127.0.0.1/24" |> CIDR.parse |> CIDR.is_cidr?
   end
 
+  test "Parse of single IP should return exactly 1 host" do
+    cidr1 = CIDR.parse("127.0.0.1")
+    assert cidr1.hosts == 1
+    cidr2 = CIDR.parse("::1")
+    assert cidr2.hosts == 1
+  end
+
   # Match
 
   test "Match implied /32" do
