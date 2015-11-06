@@ -102,7 +102,7 @@ defmodule CIDR do
     create(address, address, 32, hosts(:ipv4, 32))
   end
   defp parse(address, []) when tuple_size(address) == 8 do
-    create(address, address, 128, hosts(:ipv4, 128))
+    create(address, address, 128, hosts(:ipv6, 128))
   end
   # We got a mask and need to convert it to integer
   defp parse(address, [mask]) do
