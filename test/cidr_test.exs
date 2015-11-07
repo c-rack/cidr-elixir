@@ -34,6 +34,10 @@ defmodule CIDRTest do
     assert "127.0.0.1/24" |> CIDR.parse |> CIDR.is_cidr?
   end
 
+  test "Do not parse ::1/256" do
+    assert "::1/256" |> CIDR.parse == {:error, "Invalid mask 256"}
+  end
+
   test "Parse of single IP should return exactly 1 host" do
     cidr1 = CIDR.parse("127.0.0.1")
     assert cidr1.hosts == 1
