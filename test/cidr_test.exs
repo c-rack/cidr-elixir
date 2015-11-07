@@ -38,6 +38,18 @@ defmodule CIDRTest do
     assert "::1/256" |> CIDR.parse == {:error, "Invalid mask 256"}
   end
 
+  test "Start and end of IPv4 address range" do
+    cidr = "127.0.0.1/24" |> CIDR.parse
+    assert cidr.start == {127, 0, 0, 0}
+    assert cidr.end   == {127, 0, 0, 255}
+  end
+
+  test "Start and end of IPv6 address range" do
+    cidr = "::1/24" |> CIDR.parse
+    assert cidr.start == {0, 0, 0, 0, 0, 0, 0, 0}
+    assert cidr.end   == {0, 255, 65535, 65535, 65535, 65535, 65535, 65535}
+  end
+
   test "Parse of single IP should return exactly 1 host" do
     cidr1 = CIDR.parse("127.0.0.1")
     assert cidr1.hosts == 1
