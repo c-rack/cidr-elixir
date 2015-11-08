@@ -112,4 +112,13 @@ defmodule CIDRTest do
       CIDR.match!(cidr, "This is not an IP")
     end
   end
+
+  test "Match! without error" do
+    cidr = CIDR.parse("1.2.3.4/24")
+    assert CIDR.match!(cidr, {1,2,3,4}) == true
+    assert CIDR.match!(cidr, {1,2,3,9}) == true
+    assert CIDR.match!(cidr, {2,2,2,2}) == false
+  end
+
 end
+
