@@ -11,6 +11,7 @@ defmodule CIDR.Mixfile do
         {:earmark,     "~> 0.1",  only: [:dev, :docs]},
         {:ex_doc,      "~> 0.10", only: [:dev, :docs]},
         {:excoveralls, "~> 0.4",  only: [:dev, :test]},
+        {:inch_ex,                only: :docs}
       ],
       description: "Classless Inter-Domain Routing (CIDR) for Elixir",
       docs: [
