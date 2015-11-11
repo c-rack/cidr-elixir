@@ -85,9 +85,7 @@ defmodule CIDR do
   """
   def parse(string) when string |> is_bitstring do
     [address | mask]  = string |> String.split("/")
-    ip_address = parse_address(address)
-
-    case ip_address do
+    case parse_address(address) do
       {:ok, address}   -> parse(address, mask)
       {:error, reason} -> {:error, reason}
     end
@@ -109,14 +107,10 @@ defmodule CIDR do
     parse(address, mask |> int)
   end
   # Validate that mask is valid
-  defp parse(address, mask) when
-      tuple_size(address) == 4 and
-      ((mask < 0) or (mask > 32)) do
+  defp parse(address, mask) when tuple_size(address) == 4 and not mask in 0..32 do
     {:error, "Invalid mask #{mask}"}
   end
-  defp parse(address, mask) when
-      tuple_size(address) == 8 and
-      ((mask < 0) or (mask > 128)) do
+  defp parse(address, mask) when tuple_size(address) == 8 and not mask in 0..128 do
     {:error, "Invalid mask #{mask}"}
   end
   # Everything is fine
@@ -154,7 +148,7 @@ defmodule CIDR do
     b1  = ((x >>> 16) &&& 0xFF)
     c1  = ((x >>>  8) &&& 0xFF)
     d1  = ((x >>>  0) &&& 0xFF)
-    { a1, b1, c1, d1 }
+    {a1, b1, c1, d1}
   end
   defp start_address({a, b, c, d, e, f, g, h}, mask) do
     s   = (128 - mask)
@@ -167,7 +161,7 @@ defmodule CIDR do
     f1  = ((x >>>  32) &&& 0xFFFF)
     g1  = ((x >>>  16) &&& 0xFFFF)
     h1  = ((x >>>   0) &&& 0xFFFF)
-    { a1, b1, c1, d1, e1, f1, g1, h1 }
+    {a1, b1, c1, d1, e1, f1, g1, h1}
   end
 
   defp end_address({a, b, c, d}, mask) do
@@ -178,7 +172,7 @@ defmodule CIDR do
     b1  = ((y >>> 16) &&& 0xFF)
     c1  = ((y >>>  8) &&& 0xFF)
     d1  = ((y >>>  0) &&& 0xFF)
-    { a1, b1, c1, d1 }
+    {a1, b1, c1, d1}
   end
   defp end_address({a, b, c, d, e, f, g, h}, mask) do
     s   = (128 - mask)
@@ -192,33 +186,27 @@ defmodule CIDR do
     f1  = ((y >>>  32) &&& 0xFFFF)
     g1  = ((y >>>  16) &&& 0xFFFF)
     h1  = ((y >>>   0) &&& 0xFFFF)
-    { a1, b1, c1, d1, e1, f1, g1, h1 }
+    {a1, b1, c1, d1, e1, f1, g1, h1}
   end
 
-  defp is_ipv6({a, b, c, d, e, f, g, h}) do
-    a in 0..65535 and
-    b in 0..65535 and
-    c in 0..65535 and
-    d in 0..65535 and
-    e in 0..65535 and
-    f in 0..65535 and
-    g in 0..65535 and
-    h in 0..65535
+  defp is_ipv6(address) when tuple_size(address) == 8 do
+    address
+    |> Tuple.to_list
+    |> Enum.all?(&(&1 in 0..65535))
   end
   defp is_ipv6(_), do: false
 
-  defp is_ipv4({a, b, c, d}) do
-    a in 0..255 and
-    b in 0..255 and
-    c in 0..255 and
-    d in 0..255
+  defp is_ipv4(address) when tuple_size(address) == 4 do
+    address
+    |> Tuple.to_list
+    |> Enum.all?(&(&1 in 0..255))
   end
   defp is_ipv4(_), do: false
 
   defp int(x) do
     case x |> Integer.parse do
-      :error  -> -1
-      {a,_}   -> a
+      :error -> -1
+      {a, _} -> a
     end
   end
 
