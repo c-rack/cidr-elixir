@@ -62,7 +62,16 @@ false
 Keep in mind that `match!/2` throws an ArgumentError when you pass in a value
 that does not represent a valid IP address or when you try to match an IPv4
 address with an IPv6 range and vice-versa. We also provide `match/2`, a non-
-throwing interface that returns tagged tuples.
+throwing interface that returns tagged tuples:
+
+```elixir
+iex(8)> cidr |> CIDR.match("1.2.3.100")
+{:ok, true}
+iex(9)> cidr |> CIDR.match("1.2.4.1")
+{:ok, false}
+iex(10)> cidr |> CIDR.match("1.2.3.1000")
+{:error, "Tuple is not a valid IP address."}
+```
 
 ## Contribution Process
 
@@ -77,7 +86,7 @@ code changes.
 1. Check for [open issues](https://github.com/c-rack/cidr-elixir/issues) or
 [open a new issue](https://github.com/c-rack/cidr-elixir/issues/new) to start
 a discussion around a feature idea or a bug.
-2. Fork the [cidr-elixir repository on Github](https://github.com/c-rack/cidr-elixir)
+2. Fork the [cidr-elixir repository on GitHub](https://github.com/c-rack/cidr-elixir)
 to start making your changes.
 3. Write a test which shows that the bug was fixed or that the feature works as
 expected
