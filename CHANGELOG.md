@@ -4,6 +4,21 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2015-11-22
+### Added
+- Code documentation
+- Code coverage and badge
+- Inch-CI reporting and badge
+- Tests for IPv6 `match/2`
+- Usage examples
+
+### Fixed
+- Error reason is not promoted
+- Number of hosts not correct for IPv6 CIDR
+
+### Removed
+- Unused method `mask_by_ip/1`
+
 ## [0.3.0] - 2015-10-27
 ### Added
 - Support for IPv6 ([Laurens Duijvesteijn](https://github.com/duijf))
@@ -27,7 +42,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Initial commit
 
 
-[unreleased]: https://github.com/c-rack/cidr-elixir/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/c-rack/cidr-elixir/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/c-rack/cidr-elixir/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/c-rack/cidr-elixir/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/c-rack/cidr-elixir/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/c-rack/cidr-elixir/commit/c58275a952ec308e5509bb13455e186c894dc3e0
