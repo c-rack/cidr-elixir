@@ -1,7 +1,15 @@
 language: elixir
 sudo: false
-otp_release:
-    - 17.4
+elixir:
+  - 1.0.5
+  - 1.1.0
+ otp_release:
+  - 17.4
+  - 18.1
+cache:
+  directories:
+    - _build
+    - deps
 after_success:
   - "mix compile && mix coveralls.travis"
 after_script:
