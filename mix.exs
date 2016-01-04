@@ -39,7 +39,6 @@ defmodule CIDR.Mixfile do
       licenses: ["MIT License"],
       links: %{
         "Changelog" => "https://github.com/c-rack/cidr-elixir/blob/master/CHANGELOG.md",
-        "Docs" => "https://hexdocs.pm/cidr",
         "GitHub" => "https://github.com/c-rack/cidr-elixir"
       }
     }
