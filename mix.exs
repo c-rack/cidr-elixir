@@ -9,7 +9,7 @@ defmodule CIDR.Mixfile do
       elixir: ">= 1.0.2",
       deps: [
         {:credo,       "~> 0.2",  only: [:dev, :test]},
-        {:earmark,     "~> 0.1",  only: [:dev, :docs]},
+        {:earmark,     "~> 0.2",  only: [:dev, :docs]},
         {:ex_doc,      "~> 0.11", only: [:dev, :docs]},
         {:excoveralls, "~> 0.4",  only: [:dev, :test]},
         {:inch_ex,                only: :docs}
@@ -39,7 +39,6 @@ defmodule CIDR.Mixfile do
       licenses: ["MIT License"],
       links: %{
         "Changelog" => "https://github.com/c-rack/cidr-elixir/blob/master/CHANGELOG.md",
-        "Docs" => "https://hexdocs.pm/cidr",
         "GitHub" => "https://github.com/c-rack/cidr-elixir"
       }
     }
