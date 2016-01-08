@@ -40,14 +40,14 @@ defmodule CIDRTest do
 
   test "Start and end of IPv4 address range" do
     cidr = "127.0.0.1/24" |> CIDR.parse
-    assert cidr.start == {127, 0, 0, 0}
-    assert cidr.end   == {127, 0, 0, 255}
+    assert cidr.first == {127, 0, 0, 0}
+    assert cidr.last  == {127, 0, 0, 255}
   end
 
   test "Start and end of IPv6 address range" do
     cidr = "::1/24" |> CIDR.parse
-    assert cidr.start == {0, 0, 0, 0, 0, 0, 0, 0}
-    assert cidr.end   == {0, 255, 65535, 65535, 65535, 65535, 65535, 65535}
+    assert cidr.first == {0, 0, 0, 0, 0, 0, 0, 0}
+    assert cidr.last  == {0, 255, 65535, 65535, 65535, 65535, 65535, 65535}
   end
 
   test "Parse of single IP should return exactly 1 host" do
