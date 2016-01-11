@@ -5,7 +5,7 @@ defmodule CIDR do
   Classless Inter-Domain Routing (CIDR)
   """
 
-  defstruct start: nil, end: nil, mask: nil, hosts: nil
+  defstruct first: nil, last: nil, start: nil, end: nil, mask: nil, hosts: nil
 
   @doc """
   Check whether the argument is a CIDR value.
@@ -130,10 +130,12 @@ defmodule CIDR do
     address |> String.to_char_list |> :inet.parse_address
   end
 
-  defp create(start, last, mask, hosts) do
+  defp create(first, last, mask, hosts) do
     %CIDR{
-      start: start,
-      end:   last,
+      first: first,
+      last:  last,
+      start: first, # Deprecated, use "first" instead
+      end:   last,  # Deprecated, use "last" instead
       mask:  mask,
       hosts: hosts
     }
