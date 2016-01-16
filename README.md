@@ -16,7 +16,7 @@ as a dependency:
 ```elixir
 defp deps do
   [
-    {:cidr, ">= 0.4.0"}
+    {:cidr, ">= 0.5.0"}
   ]
 end
 ```
@@ -29,13 +29,13 @@ the amount of hosts the range covers and the mask.
 
 ```elixir
 iex(1)> cidr = "1.2.3.4/24" |> CIDR.parse
-%CIDR{start: {1, 2, 3, 0}, end: {1, 2, 3, 255}, hosts: 256, mask: 24}
+%CIDR{first: {1, 2, 3, 0}, last: {1, 2, 3, 255}, hosts: 256, mask: 24}
 ```
 
 You can query the struct for all of its fields:
 
 ```elixir
-iex(2)> cidr.start
+iex(2)> cidr.first
 {1, 2, 3, 0}
 iex(3)> cidr.hosts
 256

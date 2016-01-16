@@ -4,6 +4,24 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2016-01-16
+### Added
+- CIDR struct now uses `first`/`end` for IP range
+- Credo code lint checker to dev/test dependencies
+
+### Changed
+- Travis-CI uses now caching
+- Updated dependencies
+
+### Deprecated
+- Usage of `start`/`end` in CIDR struct
+
+### Fixed
+- All warnings produced by credo code lint checker
+
+### Removed
+- Link to hexdocs, because hex.pm shows this automatically
+
 ## [0.4.0] - 2015-11-22
 ### Added
 - Code documentation
@@ -42,7 +60,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Initial commit
 
 
-[unreleased]: https://github.com/c-rack/cidr-elixir/compare/v0.4.0...HEAD
+[unreleased]: https://github.com/c-rack/cidr-elixir/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/c-rack/cidr-elixir/compare/v0.5.0...v0.5.0
 [0.4.0]: https://github.com/c-rack/cidr-elixir/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/c-rack/cidr-elixir/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/c-rack/cidr-elixir/compare/v0.1.0...v0.2.0
