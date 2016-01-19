@@ -38,7 +38,7 @@ defmodule CIDR do
       {:error, reason} -> {:error, reason}
     end
   end
-  def match(%CIDR{start: {a, b, c, d}, end: {e, f, g, h}}, address = {i, j, k, l}) do
+  def match(%CIDR{first: {a, b, c, d}, last: {e, f, g, h}}, address = {i, j, k, l}) do
     if is_ipv4(address) do
       result =
         i in a..e and
@@ -50,7 +50,7 @@ defmodule CIDR do
       {:error, "Tuple is not a valid IP address."}
     end
   end
-  def match(%CIDR{start: {a, b, c, d, e, f, g, h}, end: {i, j, k, l, m, n, o, p}},
+  def match(%CIDR{first: {a, b, c, d, e, f, g, h}, last: {i, j, k, l, m, n, o, p}},
             address = {q, r, s, t, u, v, w, x}) do
     if is_ipv6(address) do
       result =
@@ -67,7 +67,7 @@ defmodule CIDR do
       {:error, "Tuple is not a valid IP address."}
     end
   end
-  def match(_address, _mask),
+  def match(_cidr, _address),
     do: {:error, "Argument must be a binary or IP tuple of the same protocol."}
 
   @doc """
