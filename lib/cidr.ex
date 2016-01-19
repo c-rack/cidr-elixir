@@ -176,11 +176,11 @@ defmodule CIDR do
     ||| (e <<< 48) ||| (f <<< 32) ||| (g <<< 16) ||| h) >>> s) <<< s
   end
 
-  defp is_ipv6({_, _, _, _, _, _, _, _} = tuple), do: is_ipvx(tuple, 0..65535)
-  defp is_ipv6(_), do: false
-
   defp is_ipv4({_, _, _, _} = tuple), do: is_ipvx(tuple, 0..255)
   defp is_ipv4(_), do: false
+
+  defp is_ipv6({_, _, _, _, _, _, _, _} = tuple), do: is_ipvx(tuple, 0..65535)
+  defp is_ipv6(_), do: false
 
   defp is_ipvx(tuple, range) do
     tuple
