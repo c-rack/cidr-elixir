@@ -47,7 +47,7 @@ defmodule CIDR do
         l in d..h
       {:ok, result}
     else
-      {:error, "Tuple is not a valid IP address."}
+      {:error, "Tuple is not a valid IP address"}
     end
   end
   def match(%CIDR{first: {a, b, c, d, e, f, g, h}, last: {i, j, k, l, m, n, o, p}},
@@ -64,11 +64,11 @@ defmodule CIDR do
         x in h..p
       {:ok, result}
     else
-      {:error, "Tuple is not a valid IP address."}
+      {:error, "Tuple is not a valid IP address"}
     end
   end
   def match(_cidr, _address),
-    do: {:error, "Argument must be a binary or IP tuple of the same protocol."}
+    do: {:error, "Argument must be a binary or IP tuple of the same protocol"}
 
   @doc """
   Throwing version of match/2, raises `ArgumentError` on error.
@@ -168,6 +168,7 @@ defmodule CIDR do
     h = ((x >>>   0) &&& 0xFFFF)
     {a, b, c, d, e, f, g, h}
   end
+
   defp tuple2number({a, b, c, d}, s) do
     (((a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d) >>> s) <<< s
   end
