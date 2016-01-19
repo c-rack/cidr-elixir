@@ -141,25 +141,27 @@ defmodule CIDR do
     }
   end
 
-  defp num_hosts(:ipv4, mask) do
-    1 <<< (32 - mask)
-  end
-  defp num_hosts(:ipv6, mask) do
-    1 <<< (128 - mask)
-  end
+  defp num_hosts(:ipv4, mask), do: 1 <<< (32 - mask)
+  defp num_hosts(:ipv6, mask), do: 1 <<< (128 - mask)
 
-  defp start_address({_, _, _, _} = tuple, mask) do
+  defp start_address(tuple, mask), do: range_address(tuple, mask, false)
+
+  defp end_address(tuple, mask), do: range_address(tuple, mask, true)
+
+  defp range_address({_, _, _, _} = tuple, mask, is_last) do
     s = (32 - mask)
     x = tuple2number(tuple, s)
+    if is_last, do: x = x ||| ((1 <<< s) - 1)
     a = ((x >>> 24) &&& 0xFF)
     b = ((x >>> 16) &&& 0xFF)
     c = ((x >>>  8) &&& 0xFF)
     d = ((x >>>  0) &&& 0xFF)
     {a, b, c, d}
   end
-  defp start_address({_, _, _, _, _, _, _, _} = tuple, mask) do
+  defp range_address({_, _, _, _, _, _, _, _} = tuple, mask, is_last) do
     s = (128 - mask)
     x = tuple2number(tuple, s)
+    if is_last, do: x = x ||| ((1 <<< s) - 1)
     a = ((x >>> 112) &&& 0xFFFF)
     b = ((x >>>  96) &&& 0xFFFF)
     c = ((x >>>  80) &&& 0xFFFF)
@@ -170,32 +172,6 @@ defmodule CIDR do
     h = ((x >>>   0) &&& 0xFFFF)
     {a, b, c, d, e, f, g, h}
   end
-
-  defp end_address({_, _, _, _} = tuple, mask) do
-    s = (32 - mask)
-    x = tuple2number(tuple, s)
-    y = x ||| ((1 <<< s) - 1)
-    a = ((y >>> 24) &&& 0xFF)
-    b = ((y >>> 16) &&& 0xFF)
-    c = ((y >>>  8) &&& 0xFF)
-    d = ((y >>>  0) &&& 0xFF)
-    {a, b, c, d}
-  end
-  defp end_address({_, _, _, _, _, _, _, _} = tuple, mask) do
-    s = (128 - mask)
-    x = tuple2number(tuple, s)
-    y = x ||| ((1 <<< s) - 1)
-    a = ((y >>> 112) &&& 0xFFFF)
-    b = ((y >>>  96) &&& 0xFFFF)
-    c = ((y >>>  80) &&& 0xFFFF)
-    d = ((y >>>  64) &&& 0xFFFF)
-    e = ((y >>>  48) &&& 0xFFFF)
-    f = ((y >>>  32) &&& 0xFFFF)
-    g = ((y >>>  16) &&& 0xFFFF)
-    h = ((y >>>   0) &&& 0xFFFF)
-    {a, b, c, d, e, f, g, h}
-  end
-
   defp tuple2number({a, b, c, d}, s) do
     (((a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d) >>> s) <<< s
   end
@@ -204,19 +180,17 @@ defmodule CIDR do
     ||| (e <<< 48) ||| (f <<< 32) ||| (g <<< 16) ||| h) >>> s) <<< s
   end
 
-  defp is_ipv6(address) when tuple_size(address) == 8 do
-    address
-    |> Tuple.to_list
-    |> Enum.all?(&(&1 in 0..65535))
-  end
+  defp is_ipv6({_, _, _, _, _, _, _, _} = tuple), do: is_ipvx(tuple, 0..65535)
   defp is_ipv6(_), do: false
 
-  defp is_ipv4(address) when tuple_size(address) == 4 do
-    address
-    |> Tuple.to_list
-    |> Enum.all?(&(&1 in 0..255))
-  end
+  defp is_ipv4({_, _, _, _} = tuple), do: is_ipvx(tuple, 0..255)
   defp is_ipv4(_), do: false
+
+  defp is_ipvx(tuple, range) do
+    tuple
+    |> Tuple.to_list
+    |> Enum.all?(&(&1 in range))
+  end
 
   defp int(x) do
     case x |> Integer.parse do
