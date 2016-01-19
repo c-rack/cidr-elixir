@@ -121,8 +121,8 @@ defmodule CIDR do
     parse(address, mask, :ipv6)
   end
   defp parse(address, mask, version) do
-    first = range_address(address, mask, false)
-    last  = range_address(address, mask, true)
+    first = range_address(version, address, mask, false)
+    last  = range_address(version, address, mask, true)
     create(first, last, mask, num_hosts(version, mask))
   end
 
@@ -144,7 +144,7 @@ defmodule CIDR do
   defp num_hosts(:ipv4, mask), do: 1 <<< (32 - mask)
   defp num_hosts(:ipv6, mask), do: 1 <<< (128 - mask)
 
-  defp range_address({_, _, _, _} = tuple, mask, is_last) do
+  defp range_address(:ipv4, tuple, mask, is_last) do
     s = (32 - mask)
     x = tuple2number(tuple, s)
     if is_last, do: x = x ||| ((1 <<< s) - 1)
@@ -154,7 +154,7 @@ defmodule CIDR do
     d = ((x >>>  0) &&& 0xFF)
     {a, b, c, d}
   end
-  defp range_address({_, _, _, _, _, _, _, _} = tuple, mask, is_last) do
+  defp range_address(:ipv6, tuple, mask, is_last) do
     s = (128 - mask)
     x = tuple2number(tuple, s)
     if is_last, do: x = x ||| ((1 <<< s) - 1)
