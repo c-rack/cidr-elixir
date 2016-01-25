@@ -1,5 +1,6 @@
 # CIDR
 
+[![Downloads](https://img.shields.io/hexpm/dt/cidr.svg)](https://hex.pm/packages/cidr)
 [![Hex.pm Version](http://img.shields.io/hexpm/v/cidr.svg)](https://hex.pm/packages/cidr)
 [![Build Status](https://travis-ci.org/c-rack/cidr-elixir.png?branch=master)](https://travis-ci.org/c-rack/cidr-elixir)
 [![Coverage Status](https://coveralls.io/repos/c-rack/cidr-elixir/badge.svg?branch=&service=github)](https://coveralls.io/github/c-rack/cidr-elixir?branch=)
