@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 defmodule CIDR.Mixfile do
   use Mix.Project
 
@@ -36,7 +40,7 @@ defmodule CIDR.Mixfile do
         "Constantin Rack",
         "Laurens Duijvesteijn"
       ],
-      licenses: ["MIT License"],
+      licenses: ["Mozilla Public License 2.0"],
       links: %{
         "Changelog" => "https://github.com/c-rack/cidr-elixir/blob/master/CHANGELOG.md",
         "GitHub" => "https://github.com/c-rack/cidr-elixir"
