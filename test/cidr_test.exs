@@ -98,18 +98,18 @@ defmodule CIDRTest do
   test "Match error handling" do
     cidr = CIDR.parse("1.2.3.4/24")
 
-    assert CIDR.match(cidr, {1,2,3,257}) == {:error, "Tuple is not a valid IP address."}
-    assert CIDR.match(cidr, {0, 0, 0, 0, 0, 0, 0, 100000}) == {:error, "Argument must be a binary or IP tuple of the same protocol."}
+    assert CIDR.match(cidr, {1,2,3,257}) == {:error, "Tuple is not a valid IP address"}
+    assert CIDR.match(cidr, {0, 0, 0, 0, 0, 0, 0, 100000}) == {:error, "Argument must be a binary or IP tuple of the same protocol"}
     assert CIDR.match(cidr, "This is not an IP") == {:error, :einval}
   end
 
   test "Match! error handling" do
     cidr = CIDR.parse("1.2.3.4/24")
 
-    assert_raise ArgumentError, "Tuple is not a valid IP address.", fn ->
+    assert_raise ArgumentError, "Tuple is not a valid IP address", fn ->
       CIDR.match!(cidr, {1,2,3,257})
     end
-    assert_raise ArgumentError, "Argument must be a binary or IP tuple of the same protocol.", fn ->
+    assert_raise ArgumentError, "Argument must be a binary or IP tuple of the same protocol", fn ->
       CIDR.match!(cidr, {0, 0, 0, 0, 0, 0, 0, 100000})
     end
     assert_raise ArgumentError, fn ->
