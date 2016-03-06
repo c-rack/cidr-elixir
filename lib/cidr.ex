@@ -32,7 +32,7 @@ defmodule CIDR do
   @doc """
   Checks if an IP address is in the provided CIDR.
 
-  Returns `{:ok, true}` if the address is in the CIDR range, {:ok, false} if
+  Returns `{:ok, true}` if the address is in the CIDR range, `{:ok, false}` if
   it's not, and `{:error, reason}` if the second argument isn't a valid IP
   address.
   """
