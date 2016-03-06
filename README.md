@@ -17,7 +17,7 @@ as a dependency:
 ```elixir
 defp deps do
   [
-    {:cidr, ">= 0.5.0"}
+    {:cidr, ">= 1.0.0"}
   ]
 end
 ```
