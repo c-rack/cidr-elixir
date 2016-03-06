@@ -9,7 +9,7 @@ defmodule CIDR do
   Classless Inter-Domain Routing (CIDR)
   """
 
-  defstruct first: nil, last: nil, start: nil, end: nil, mask: nil, hosts: nil
+  defstruct first: nil, last: nil, mask: nil, hosts: nil
 
   @doc """
   Check whether the argument is a CIDR value.
@@ -138,8 +138,6 @@ defmodule CIDR do
     %CIDR{
       first: first,
       last:  last,
-      start: first, # Deprecated, use "first" instead
-      end:   last,  # Deprecated, use "last" instead
       mask:  mask,
       hosts: hosts
     }
