@@ -135,12 +135,7 @@ defmodule CIDR do
   end
 
   defp create(first, last, mask, hosts) do
-    %CIDR{
-      first: first,
-      last:  last,
-      mask:  mask,
-      hosts: hosts
-    }
+    %CIDR{first: first, last: last, mask: mask, hosts: hosts}
   end
 
   defp num_hosts(:ipv4, mask), do: 1 <<< (32 - mask)
@@ -150,25 +145,18 @@ defmodule CIDR do
     s = (32 - mask)
     x = tuple2number(tuple, s)
     if is_last, do: x = x ||| ((1 <<< s) - 1)
-    a = ((x >>> 24) &&& 0xFF)
-    b = ((x >>> 16) &&& 0xFF)
-    c = ((x >>>  8) &&& 0xFF)
-    d = ((x >>>  0) &&& 0xFF)
-    {a, b, c, d}
+    x |> number2list(0, 8, 4, 0xFF) |> List.to_tuple
   end
   defp range_address(:ipv6, tuple, mask, is_last) do
     s = (128 - mask)
     x = tuple2number(tuple, s)
     if is_last, do: x = x ||| ((1 <<< s) - 1)
-    a = ((x >>> 112) &&& 0xFFFF)
-    b = ((x >>>  96) &&& 0xFFFF)
-    c = ((x >>>  80) &&& 0xFFFF)
-    d = ((x >>>  64) &&& 0xFFFF)
-    e = ((x >>>  48) &&& 0xFFFF)
-    f = ((x >>>  32) &&& 0xFFFF)
-    g = ((x >>>  16) &&& 0xFFFF)
-    h = ((x >>>   0) &&& 0xFFFF)
-    {a, b, c, d, e, f, g, h}
+    x |> number2list(0, 16, 8, 0xFFFF) |> List.to_tuple
+  end
+
+  defp number2list(_, _, _, 0, _), do: []
+  defp number2list(x, s, d, i, m) do
+    number2list(x, s + d, d, i - 1, m) ++ [(x >>> s) &&& m]
   end
 
   defp tuple2number({a, b, c, d}, s) do
