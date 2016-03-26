@@ -11,8 +11,7 @@
 
 ## Setup
 
-To use this library in your project, edit your `mix.exs` file and add `:cidr`
-as a dependency:
+To use this library, just add `:cidr` as a dependency to your `mix.exs` file:
 
 ```elixir
 defp deps do
@@ -51,7 +50,7 @@ iex(5)> cidr |> CIDR.match!({1,2,4,1})
 false
 ```
 
-The match function also supports IP strings:
+The `match!/2` function also supports IP strings:
 
 ```elixir
 iex(6)> cidr |> CIDR.match!("1.2.3.100")
@@ -60,10 +59,10 @@ iex(7)> cidr |> CIDR.match!("1.2.4.1")
 false
 ```
 
-Keep in mind that `match!/2` throws an ArgumentError when you pass in a value
+Please note that `match!/2` throws an `ArgumentError` when you pass in a value
 that does not represent a valid IP address or when you try to match an IPv4
-address with an IPv6 range and vice-versa. We also provide `match/2`, a non-
-throwing interface that returns tagged tuples:
+address with an IPv6 range and vice-versa.
+We also provide `match/2`, a non-throwing version that returns tagged tuples:
 
 ```elixir
 iex(8)> cidr |> CIDR.match("1.2.3.100")
