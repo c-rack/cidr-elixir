@@ -23,9 +23,9 @@ end
 
 ## Usage
 
-When you pass in an IP address string into `CIDR.parse`, you get a `%CIDR{}`
-struct back. This contains the start and end addresses as Erlang IP tuples,
-the amount of hosts the range covers and the mask.
+Passing an IP address string into `CIDR.parse` returns a `%CIDR{}` struct.
+It contains the first and the last address of the range as Erlang IP tuples,
+the amount of hosts the range covers and the network mask.
 
 ```elixir
 iex(1)> cidr = "1.2.3.4/24" |> CIDR.parse
@@ -73,25 +73,11 @@ iex(10)> cidr |> CIDR.match("1.2.3.1000")
 {:error, "Tuple is not a valid IP address."}
 ```
 
-## Contribution Process
+## Contribution
 
-This project uses the [C4.1 process](http://rfc.zeromq.org/spec:22) for all
-code changes.
-
-> "Everyone, without distinction or discrimination, SHALL have an equal right
-> to become a Contributor under the terms of this contract."
-
-### TL;DR
-
-1. Check for [open issues](https://github.com/c-rack/cidr-elixir/issues) or
-[open a new issue](https://github.com/c-rack/cidr-elixir/issues/new) to start
-a discussion around a feature idea or a bug.
-2. Fork the [cidr-elixir repository on GitHub](https://github.com/c-rack/cidr-elixir)
-to start making your changes.
-3. Write a test which shows that the bug was fixed or that the feature works as
-expected
-4. Send a pull request and wait for it to be merged
+See [Collective Code Construction Contract (C4)](http://rfc.zeromq.org/spec:42/C4/)
 
 ## License
 
-[Mozilla Public License 2.0](LICENSE).
+[Mozilla Public License 2.0](LICENSE)
+
