@@ -144,13 +144,13 @@ defmodule CIDR do
   defp range_address(:ipv4, tuple, mask, is_last) do
     s = (32 - mask)
     x = tuple2number(tuple, s)
-    if is_last, do: x = x ||| ((1 <<< s) - 1)
+    x = if is_last, do: x ||| ((1 <<< s) - 1), else: x
     x |> number2list(0, 8, 4, 0xFF) |> List.to_tuple
   end
   defp range_address(:ipv6, tuple, mask, is_last) do
     s = (128 - mask)
     x = tuple2number(tuple, s)
-    if is_last, do: x = x ||| ((1 <<< s) - 1)
+    x = if is_last, do: x ||| ((1 <<< s) - 1), else: x
     x |> number2list(0, 16, 8, 0xFFFF) |> List.to_tuple
   end
 
@@ -170,7 +170,7 @@ defmodule CIDR do
   defp is_ipv4({_, _, _, _} = tuple), do: is_ipvx(tuple, 0..255)
   defp is_ipv4(_), do: false
 
-  defp is_ipv6({_, _, _, _, _, _, _, _} = tuple), do: is_ipvx(tuple, 0..65535)
+  defp is_ipv6({_, _, _, _, _, _, _, _} = tuple), do: is_ipvx(tuple, 0..65_535)
   defp is_ipv6(_), do: false
 
   defp is_ipvx(tuple, range) do

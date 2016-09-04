@@ -4,6 +4,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2016-09-04
+### Changed
+- Updated Elixir version to 1.3
+- Updated dependencies
+
+### Fixed
+- Elixir 1.3 compiler warnings
+- Credo warnings
+
 ## [1.0.0] - 2016-03-06
 ### Changed
 - Changed license to MPLv2
@@ -68,7 +77,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Initial commit
 
 
-[unreleased]: https://github.com/c-rack/cidr-elixir/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/c-rack/cidr-elixir/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/c-rack/cidr-elixir/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/c-rack/cidr-elixir/compare/v0.5.0...v1.0.0
 [0.5.0]: https://github.com/c-rack/cidr-elixir/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/c-rack/cidr-elixir/compare/v0.3.0...v0.4.0

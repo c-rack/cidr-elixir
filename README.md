@@ -16,7 +16,7 @@ To use this library, just add `:cidr` as a dependency to your `mix.exs` file:
 ```elixir
 defp deps do
   [
-    {:cidr, ">= 1.0.0"}
+    {:cidr, ">= 1.1.0"}
   ]
 end
 ```
