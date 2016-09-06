@@ -5,16 +5,16 @@
 defmodule CIDR.Mixfile do
   use Mix.Project
 
-  @version "1.0.0"
+  @version "1.1.0"
 
   def project do
     [
       app: :cidr,
-      elixir: ">= 1.0.2",
+      elixir: ">= 1.3.0",
       deps: [
-        {:credo,       "~> 0.3",  only: [:dev, :test]},
-        {:earmark,     "~> 0.2",  only: [:dev, :docs]},
-        {:ex_doc,      "~> 0.11", only: [:dev, :docs]},
+        {:credo,       "~> 0.4",  only: [:dev, :test]},
+        {:earmark,     "~> 1.0",  only: [:dev, :docs]},
+        {:ex_doc,      "~> 0.13", only: [:dev, :docs]},
         {:excoveralls, "~> 0.5",  only: [:dev, :test]},
         {:inch_ex,     "~> 0.5",  only: :docs}
       ],
