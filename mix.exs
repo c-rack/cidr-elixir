@@ -24,7 +24,7 @@ defmodule CIDR.Mixfile do
         source_ref: "v#{@version}",
         source_url: "https://github.com/c-rack/cidr-elixir"
       ],
-      package: package,
+      package: package(),
       test_coverage: [tool: ExCoveralls],
       version: @version
     ]
