@@ -12,6 +12,15 @@ defmodule CIDR do
   defstruct first: nil, last: nil, mask: nil, hosts: nil
 
   @doc """
+  Implemt conversion to string
+  """
+  defimpl String.Chars, for: CIDR do
+
+    def to_string(cidr), do: "#{:inet.ntoa(cidr.first)}/#{cidr.mask}"
+
+  end
+
+  @doc """
   Check whether the argument is a CIDR value.
 
   ## Examples
