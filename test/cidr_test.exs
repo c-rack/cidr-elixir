@@ -124,5 +124,75 @@ defmodule CIDRTest do
     assert CIDR.match!(cidr, {2,2,2,2}) == false
   end
 
+  test "Split IPv4" do
+    cidr_list = CIDR.parse("1.0.0.0/24") |> CIDR.split(28) |> Enum.map(&(&1))
+    f = List.first cidr_list
+    assert f.first == {1, 0, 0, 0}
+    assert f.last == {1, 0, 0, 15}
+    assert f.hosts == 16
+    assert f.mask == 28
+    f = List.last cidr_list
+    assert f.first == {1, 0, 0, 240}
+    assert f.last == {1, 0, 0, 255}
+    assert f.hosts == 16
+    assert f.mask == 28
+    assert length(cidr_list) == 16
+  end
+
+  test "Split IPv6" do
+    cidr_list = CIDR.parse("2001::/60") |> CIDR.split(64) |> Enum.map(&(&1))
+    f = List.first cidr_list
+    assert f.first == {8193, 0, 0, 0, 0, 0, 0, 0}
+    assert f.last == {8193, 0, 0, 0, 65535, 65535, 65535, 65535}
+    assert f.hosts == 18446744073709551616
+    assert f.mask == 64
+    f = List.last cidr_list
+    assert f.first == {8193, 0, 0, 15, 0, 0, 0, 0}
+    assert f.last == {8193, 0, 0, 15, 65535, 65535, 65535, 65535}
+    assert f.hosts == 18446744073709551616
+    assert f.mask == 64
+    assert length(cidr_list) == 16
+  end
+
+  test "Split error" do
+    assert CIDR.parse("1.0.0.0/24") |> CIDR.split(23) == {:error, "New mask must be larger than existing cidr"}
+  end
+
+  test "Hosts IPv4" do
+    host_list = CIDR.parse("1.0.0.0/24") |> CIDR.hosts |> Enum.map(&(&1))
+    assert List.first(host_list) == {1, 0, 0, 0}
+    assert List.last(host_list) == {1, 0, 0, 255}
+    assert length(host_list) == 256
+  end
+
+  test "Hosts IPv6" do
+    host_list = CIDR.parse("2001::/126") |> CIDR.hosts |> Enum.map(&(&1))
+    assert List.first(host_list) == {8193, 0, 0, 0, 0, 0, 0, 0}
+    assert List.last(host_list) == {8193, 0, 0, 0, 0, 0, 0, 3}
+    assert length(host_list) == 4
+  end
+
+  test "Equal IPv4" do
+    assert CIDR.equal?(CIDR.parse("1.0.0.0/24"), CIDR.parse("1.0.0.0/24"))
+    assert CIDR.equal?(CIDR.parse("1.0.1.0/24"), CIDR.parse("1.0.0.0/24")) == false
+  end
+
+  test "Equal IPv6" do
+    assert CIDR.equal?(CIDR.parse("2001::/64"), CIDR.parse("2001::/64"))
+    assert CIDR.equal?(CIDR.parse("2001::/64"), CIDR.parse("2002::/64")) == false
+  end
+
+  test "Supernet IPv4" do
+    assert CIDR.supernet?(CIDR.parse("10.0.0.0/24"), CIDR.parse("10.0.0.128/25"))
+    assert CIDR.supernet?(CIDR.parse("10.0.1.0/24"), CIDR.parse("10.0.0.128/25")) == false
+    assert CIDR.supernet?(CIDR.parse("10.0.0.128/25"), CIDR.parse("10.0.0.0/24")) == false
+  end
+
+  test "Subnet IPv4" do
+    assert CIDR.subnet?(CIDR.parse("10.0.0.0/24"), CIDR.parse("10.0.0.128/25")) == false
+    assert CIDR.subnet?(CIDR.parse("10.0.1.0/24"), CIDR.parse("10.0.0.128/25")) == false
+    assert CIDR.subnet?(CIDR.parse("10.0.0.128/25"), CIDR.parse("10.0.0.0/24"))
+  end
+
 end
 

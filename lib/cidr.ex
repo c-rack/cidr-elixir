@@ -11,6 +11,18 @@ defmodule CIDR do
 
   defstruct first: nil, last: nil, mask: nil, hosts: nil
 
+  defimpl String.Chars, for: CIDR do
+
+    @doc """
+    Prints cidr objectes in human readable format
+
+    IPv4: 1.1.1.0/24
+    IPv6: 2001::/64
+    """
+    def to_string(cidr), do: "#{:inet.ntoa(cidr.first)}/#{cidr.mask}"
+
+  end
+
   @doc """
   Check whether the argument is a CIDR value.
 
@@ -85,6 +97,99 @@ defmodule CIDR do
   end
 
   @doc """
+  Returns a stream of all hosts in the range
+
+
+  ## Examples
+
+         iex> CIDR.parse("192.168.0.0/31") |> CIDR.hosts |> Enum.map(fn(x) -> x end)
+         [{192, 168, 0, 0}, {192, 168, 0, 1}]
+
+  """
+  def hosts(%CIDR{first: {_, _, _, _}} = cidr) do
+    t = tuple2number(cidr.first, (32 - cidr.mask))
+    Stream.map(0..(cidr.hosts - 1), fn(x) -> number2tuple(t + x, :ipv4) end)
+  end
+  def hosts(%CIDR{first: {_, _, _, _, _, _, _, _}} = cidr) do
+    t = tuple2number(cidr.first, (128 - cidr.mask))
+    Stream.map(0..(cidr.hosts - 1), fn(x) -> number2tuple(t + x, :ipv6) end)
+  end
+
+  @doc """
+  Checks if two cidr objects are equal
+
+
+  ### Examples
+
+       iex> d = CIDR.parse("10.0.0.0/24")
+       %CIDR{first: {10, 0, 0, 0}, hosts: 256, last: {10, 0, 0, 255}, mask: 24}
+       iex> c = CIDR.parse("10.0.0.0/24")
+       %CIDR{first: {10, 0, 0, 0}, hosts: 256, last: {10, 0, 0, 255}, mask: 24}
+       iex(21)> CIDR.equal?(d, c)
+       true
+
+  """
+  def equal?(a, b) do
+    a.first == b.first and
+    a.last == b.last
+  end
+
+
+  @doc """
+  Checks if a is a subnet of b
+  """
+  def subnet?(%CIDR{mask: mask_a}, %CIDR{mask: mask_b}) when mask_a < mask_b do
+    false
+  end
+  def subnet?(a, b) do
+    (tuple2number(a.first, 0) >= tuple2number(b.first, 0)) and
+    (tuple2number(a.last, 0) <= tuple2number(b.last, 0))
+  end
+
+  @doc """
+  Checks if a is a supernet of b
+  """
+  def supernet?(%CIDR{mask: mask_a}, %CIDR{mask: mask_b}) when mask_a > mask_b do
+    false
+  end
+  def supernet?(a, b) do
+    tuple2number(a.first, 0) <= tuple2number(b.first, 0) and
+    tuple2number(a.last, 0) >= tuple2number(b.last, 0)
+  end
+  @doc """
+  Splits an existing cidr into smaller blocks
+
+
+  ### Examples
+
+         iex> CIDR.parse("192.168.0.0/24") |> CIDR.split(25) |> Enum.map(&(&1))
+         [%CIDR{first: {192, 168, 0, 0}, hosts: 128, last: {192, 168, 0, 127}, mask: 25},
+          %CIDR{first: {192, 168, 0, 128}, hosts: 128, last: {192, 168, 0, 255}, mask: 25}]
+
+  """
+  def split(%CIDR{mask: mask}, new_mask) when mask > new_mask do
+    {:error, "New mask must be larger than existing cidr"}
+  end
+  def split(%CIDR{first: {_, _, _, _}}=cidr, new_mask) do
+    x = tuple2number(cidr.first, 32 - cidr.mask)
+    split(x, new_mask, cidr.mask, :ipv4)
+  end
+  def split(%CIDR{first: {_, _, _, _, _, _, _, _}}=cidr, new_mask) do
+    x = tuple2number(cidr.first, 128 - cidr.mask)
+    split(x, new_mask, cidr.mask, :ipv6)
+  end
+  defp split(start, new_mask, old_mask, afi) do
+    n = :math.pow(2, (new_mask - old_mask))- 1 |> round
+    step = num_hosts(afi, new_mask)
+    Stream.map(0..n, fn(x) ->
+      offset = start + (step) * x
+      first = number2tuple(offset, afi)
+      last = number2tuple((offset + (step - 1)), afi)
+      %CIDR{first: first, last: last, mask: new_mask, hosts: step}
+    end)
+  end
+
+  @doc """
   Parses a bitstring into a CIDR struct
   """
   def parse(string) when string |> is_bitstring do
@@ -98,7 +203,6 @@ defmodule CIDR do
   def parse(_other) do
     {:error, "Not a bitstring"}
   end
-
   # We got a simple IP address without mask
   defp parse(address, []) when tuple_size(address) == 4 do
     create(address, address, 32, num_hosts(:ipv4, 32))
@@ -145,24 +249,30 @@ defmodule CIDR do
     s = (32 - mask)
     x = tuple2number(tuple, s)
     x = if is_last, do: x ||| ((1 <<< s) - 1), else: x
-    x |> number2list(0, 8, 4, 0xFF) |> List.to_tuple
+    x |> number2tuple(:ipv4)
   end
   defp range_address(:ipv6, tuple, mask, is_last) do
     s = (128 - mask)
     x = tuple2number(tuple, s)
     x = if is_last, do: x ||| ((1 <<< s) - 1), else: x
-    x |> number2list(0, 16, 8, 0xFFFF) |> List.to_tuple
+    x |> number2tuple(:ipv6)
   end
 
-  defp number2list(_, _, _, 0, _), do: []
-  defp number2list(x, s, d, i, m) do
+  def number2tuple(n, afi) do
+    case afi do
+      :ipv6 -> number2list(n, 0, 16, 8, 0xFFFF) |> List.to_tuple
+      :ipv4 -> number2list(n, 0, 8, 4, 0xFF) |> List.to_tuple
+    end
+  end
+  def number2list(_, _, _, 0, _), do: []
+  def number2list(x, s, d, i, m) do
     number2list(x, s + d, d, i - 1, m) ++ [(x >>> s) &&& m]
   end
 
-  defp tuple2number({a, b, c, d}, s) do
+  def tuple2number({a, b, c, d}, s) do
     (((a <<< 24) ||| (b <<< 16) ||| (c <<< 8) ||| d) >>> s) <<< s
   end
-  defp tuple2number({a, b, c, d, e, f, g, h}, s) do
+  def tuple2number({a, b, c, d, e, f, g, h}, s) do
     (((a <<< 112) ||| (b <<< 96) ||| (c <<< 80) ||| (d <<< 64)
     ||| (e <<< 48) ||| (f <<< 32) ||| (g <<< 16) ||| h) >>> s) <<< s
   end
