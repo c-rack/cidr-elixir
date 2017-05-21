@@ -94,6 +94,25 @@ defmodule CIDR do
   end
 
   @doc """
+  Returns a stream of all hosts in the range
+
+
+  ## Examples
+
+         iex> CIDR.parse("192.168.0.0/31") |> CIDR.hosts |> Enum.map(fn(x) -> x end)
+         [{192, 168, 0, 0}, {192, 168, 0, 1}]
+
+  """
+  def hosts(%CIDR{first: {_, _, _, _}} = cidr) do
+    t = tuple2number(cidr.first, (32 - cidr.mask))
+    Stream.map(0..cidr.hosts - 1, fn(x) -> number2list(t + x, 0, 8, 4, 0xFF) |> List.to_tuple end)
+  end
+  def hosts(%CIDR{first: {_, _, _, _, _, _, _, _}} = cidr) do
+    t = tuple2number(cidr.first, (128 - cidr.mask))
+    Stream.map(0..cidr.hosts - 1, fn(x) -> number2list(t + x, 0, 16, 8, 0xFFFF) |> List.to_tuple end)
+  end
+
+  @doc """
   Parses a bitstring into a CIDR struct
   """
   def parse(string) when string |> is_bitstring do
@@ -107,7 +126,6 @@ defmodule CIDR do
   def parse(_other) do
     {:error, "Not a bitstring"}
   end
-
   # We got a simple IP address without mask
   defp parse(address, []) when tuple_size(address) == 4 do
     create(address, address, 32, num_hosts(:ipv4, 32))
