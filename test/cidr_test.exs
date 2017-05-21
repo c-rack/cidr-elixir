@@ -164,11 +164,34 @@ defmodule CIDRTest do
     assert List.last(host_list) == {1, 0, 0, 255}
     assert length(host_list) == 256
   end
+
   test "Hosts IPv6" do
     host_list = CIDR.parse("2001::/126") |> CIDR.hosts |> Enum.map(&(&1))
     assert List.first(host_list) == {8193, 0, 0, 0, 0, 0, 0, 0}
     assert List.last(host_list) == {8193, 0, 0, 0, 0, 0, 0, 3}
     assert length(host_list) == 4
+  end
+
+  test "Equal IPv4" do
+    assert CIDR.equal?(CIDR.parse("1.0.0.0/24"), CIDR.parse("1.0.0.0/24"))
+    assert CIDR.equal?(CIDR.parse("1.0.1.0/24"), CIDR.parse("1.0.0.0/24")) == false
+  end
+
+  test "Equal IPv6" do
+    assert CIDR.equal?(CIDR.parse("2001::/64"), CIDR.parse("2001::/64"))
+    assert CIDR.equal?(CIDR.parse("2001::/64"), CIDR.parse("2002::/64")) == false
+  end
+
+  test "Supernet IPv4" do
+    assert CIDR.supernet?(CIDR.parse("10.0.0.0/24"), CIDR.parse("10.0.0.128/25"))
+    assert CIDR.supernet?(CIDR.parse("10.0.1.0/24"), CIDR.parse("10.0.0.128/25")) == false
+    assert CIDR.supernet?(CIDR.parse("10.0.0.128/25"), CIDR.parse("10.0.0.0/24")) == false
+  end
+
+  test "Subnet IPv4" do
+    assert CIDR.subnet?(CIDR.parse("10.0.0.0/24"), CIDR.parse("10.0.0.128/25")) == false
+    assert CIDR.subnet?(CIDR.parse("10.0.1.0/24"), CIDR.parse("10.0.0.128/25")) == false
+    assert CIDR.subnet?(CIDR.parse("10.0.0.128/25"), CIDR.parse("10.0.0.0/24"))
   end
 
 end

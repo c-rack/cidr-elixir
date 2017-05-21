@@ -11,11 +11,14 @@ defmodule CIDR do
 
   defstruct first: nil, last: nil, mask: nil, hosts: nil
 
-  @doc """
-  Implemt conversion to string
-  """
   defimpl String.Chars, for: CIDR do
 
+    @doc """
+    Prints cidr objectes in human readable format
+
+    IPv4: 1.1.1.0/24
+    IPv6: 2001::/64
+    """
     def to_string(cidr), do: "#{:inet.ntoa(cidr.first)}/#{cidr.mask}"
 
   end
@@ -113,6 +116,47 @@ defmodule CIDR do
   end
 
   @doc """
+  Checks if two cidr objects are equal
+
+
+  ### Examples
+
+       iex> d = CIDR.parse("10.0.0.0/24")
+       %CIDR{first: {10, 0, 0, 0}, hosts: 256, last: {10, 0, 0, 255}, mask: 24}
+       iex> c = CIDR.parse("10.0.0.0/24")
+       %CIDR{first: {10, 0, 0, 0}, hosts: 256, last: {10, 0, 0, 255}, mask: 24}
+       iex(21)> CIDR.equal?(d, c)
+       true
+
+  """
+  def equal?(a, b) do
+    a.first == b.first and
+    a.last == b.last
+  end
+
+
+  @doc """
+  Checks if a is a subnet of b
+  """
+  def subnet?(%CIDR{mask: mask_a}, %CIDR{mask: mask_b}) when mask_a < mask_b do
+    false
+  end
+  def subnet?(a, b) do
+    (tuple2number(a.first, 0) >= tuple2number(b.first, 0)) and
+    (tuple2number(a.last, 0) <= tuple2number(b.last, 0))
+  end
+
+  @doc """
+  Checks if a is a supernet of b
+  """
+  def supernet?(%CIDR{mask: mask_a}, %CIDR{mask: mask_b}) when mask_a > mask_b do
+    false
+  end
+  def supernet?(a, b) do
+    tuple2number(a.first, 0) <= tuple2number(b.first, 0) and
+    tuple2number(a.last, 0) >= tuple2number(b.last, 0)
+  end
+  @doc """
   Splits an existing cidr into smaller blocks
 
 
@@ -123,7 +167,9 @@ defmodule CIDR do
           %CIDR{first: {192, 168, 0, 128}, hosts: 128, last: {192, 168, 0, 255}, mask: 25}]
 
   """
-  def split(%CIDR{mask: mask}=cidr, new_mask) when mask > new_mask, do: {:error, "New mask must be larger than existing cidr"}
+  def split(%CIDR{mask: mask}, new_mask) when mask > new_mask do
+    {:error, "New mask must be larger than existing cidr"}
+  end
   def split(%CIDR{first: {_, _, _, _}}=cidr, new_mask) do
     x = tuple2number(cidr.first, 32 - cidr.mask)
     split(x, new_mask, cidr.mask, :ipv4)
