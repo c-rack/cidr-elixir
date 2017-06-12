@@ -4,12 +4,19 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.1.0] - 2016-09-04
+## [1.1.0] - 2017-06-12
+### Added
+- Provide stream of hosts for a cidr range (@tehhobbit)
+- String.Chars for easy printing (@tehhobbit)
+- CIDR.split + tests for split and hosts (@tehhobbit)
+- Methods for comparing (@tehhobbit)
+
 ### Changed
 - Updated Elixir version to 1.3
 - Updated dependencies
 
 ### Fixed
+- Elixir 1.4 compiler warning (@tmepple)
 - Elixir 1.3 compiler warnings
 - Credo warnings
 
@@ -63,7 +70,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - `match/2` return type
 - `%CIDR{}` struct
 - `min/1` and `max/1` are now private
-- min/max values are now stored directly in CIDR struct 
+- min/max values are now stored directly in CIDR struct
 
 ## [0.2.0] - 2015-05-03
 ### Added
