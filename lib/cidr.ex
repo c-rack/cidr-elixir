@@ -54,7 +54,7 @@ defmodule CIDR do
       {:error, reason} -> {:error, reason}
     end
   end
-  def match(%CIDR{first: {a, b, c, d}, last: {e, f, g, h}}, address = {i, j, k, l}) do
+  def match(%CIDR{first: {a, b, c, d}, last: {e, f, g, h}}, {i, j, k, l} = address) do
     if is_ipv4(address) do
       result =
         i in a..e and
@@ -67,7 +67,7 @@ defmodule CIDR do
     end
   end
   def match(%CIDR{first: {a, b, c, d, e, f, g, h}, last: {i, j, k, l, m, n, o, p}},
-            address = {q, r, s, t, u, v, w, x}) do
+            {q, r, s, t, u, v, w, x} = address) do
     if is_ipv6(address) do
       result =
         q in a..i and
@@ -260,8 +260,8 @@ defmodule CIDR do
 
   def number2tuple(n, afi) do
     case afi do
-      :ipv6 -> number2list(n, 0, 16, 8, 0xFFFF) |> List.to_tuple
-      :ipv4 -> number2list(n, 0, 8, 4, 0xFF) |> List.to_tuple
+      :ipv6 -> n |> number2list(0, 16, 8, 0xFFFF) |> List.to_tuple
+      :ipv4 -> n |> number2list(0, 8, 4, 0xFF) |> List.to_tuple
     end
   end
   def number2list(_, _, _, 0, _), do: []
