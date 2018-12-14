@@ -215,10 +215,10 @@ defmodule CIDR do
     parse(address, mask |> int)
   end
   # Validate that mask is valid
-  defp parse(address, mask) when tuple_size(address) == 4 and not mask in 0..32 do
+  defp parse(address, mask) when tuple_size(address) == 4 and not(mask in 0..32) do
     {:error, "Invalid mask #{mask}"}
   end
-  defp parse(address, mask) when tuple_size(address) == 8 and not mask in 0..128 do
+  defp parse(address, mask) when tuple_size(address) == 8 and not(mask in 0..128) do
     {:error, "Invalid mask #{mask}"}
   end
   # Everything is fine
@@ -235,7 +235,7 @@ defmodule CIDR do
   end
 
   defp parse_address(address) do
-    address |> String.to_char_list |> :inet.parse_address
+    address |> String.to_charlist |> :inet.parse_address
   end
 
   defp create(first, last, mask, hosts) do
