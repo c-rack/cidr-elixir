@@ -194,5 +194,25 @@ defmodule CIDRTest do
     assert CIDR.subnet?(CIDR.parse("10.0.0.128/25"), CIDR.parse("10.0.0.0/24"))
   end
 
+  test "IPv4 Range" do
+    assert CIDR.parse_range("192.168.1.0") == %CIDR{first: {192, 168, 1, 0}, hosts: 1, last: {192, 168, 1, 0}, mask: 32}
+    assert CIDR.parse_range("192.168.1.0-") == {:error, :einval}
+    assert CIDR.parse_range("-192.168.1.0") == {:error, :einval}
+    assert CIDR.parse_range("192.168.1.0-192.168.2.0") == [
+      %CIDR{first: {192, 168, 1, 0}, hosts: 256, last: {192, 168, 1, 255}, mask: 24},
+      %CIDR{first: {192, 168, 2, 0}, hosts: 1, last: {192, 168, 2, 0}, mask: 32}
+    ]
+    assert CIDR.parse_range("2001::/126") == %CIDR{
+      first: {8193, 0, 0, 0, 0, 0, 0, 0},
+      hosts: 4,
+      last: {8193, 0, 0, 0, 0, 0, 0, 3},
+      mask: 126
+    }
+    assert CIDR.parse_range("192.168.1.0/32-192.168.2.0/32") == [
+      %CIDR{first: {192, 168, 1, 0}, hosts: 256, last: {192, 168, 1, 255}, mask: 24},
+      %CIDR{first: {192, 168, 2, 0}, hosts: 1, last: {192, 168, 2, 0}, mask: 32}
+    ]
+  end
+
 end
 

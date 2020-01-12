@@ -73,6 +73,16 @@ iex(10)> cidr |> CIDR.match("1.2.3.1000")
 {:error, "Tuple is not a valid IP address."}
 ```
 
+IPv4 deaggregation works as well. It returns a list of the largest possible networks for an IPv4 range in the format of `$first_ip-$last_ip`:
+
+```elixir
+iex(1)> CIDR.parse_range("192.168.1.0-192.168.2.0")
+[
+  %CIDR{first: {192, 168, 1, 0}, hosts: 256, last: {192, 168, 1, 255}, mask: 24},
+  %CIDR{first: {192, 168, 2, 0}, hosts: 1, last: {192, 168, 2, 0}, mask: 32}
+]
+```
+
 ## Contribution
 
 See [Collective Code Construction Contract (C4)](http://rfc.zeromq.org/spec:42/C4/)

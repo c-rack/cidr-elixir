@@ -323,4 +323,63 @@ defmodule CIDR do
       {a, _} -> a
     end
   end
+
+  @doc """
+  Returns a list of deaggregated networks from a IP range in the format of "192.168.1.0-192.168.2.0".
+
+  ## Examples
+         iex> CIDR.parse_range("192.168.1.0-192.168.2.0")
+         [
+           %CIDR{first: {192, 168, 1, 0}, hosts: 256, last: {192, 168, 1, 255}, mask: 24},
+           %CIDR{first: {192, 168, 2, 0}, hosts: 1, last: {192, 168, 2, 0}, mask: 32}
+         ]
+  """
+  def parse_range(string) when is_bitstring(string) do
+    ips = String.split(string, "-")
+
+    case length(ips) do
+      1 -> parse(string) # single ip found, use normal `parse\1` function
+      2 -> parse_range_impl(ips) # found two values, continue
+      _ -> {:error, :einval}
+    end
+  end
+
+  defp parse_range_impl([a, b]) when is_bitstring(a) and is_bitstring(b) do
+    case {parse(a), parse(b)} do
+      # only do it for ipv4.
+      # mask has to be 32 bit.
+      {%CIDR{mask: 32, first: first_a}, %CIDR{mask: 32, first: first_b}}
+      when tuple_size(first_a) == 4 and tuple_size(first_b) == 4 and first_a <= first_b ->
+        lower = tuple2number(first_a, 0)
+        higher = tuple2number(first_b, 0)
+
+        range_reduce_outer(lower, higher)
+        |> Enum.map(fn {ip, net} -> parse(number2tuple(ip, :ipv4), net, :ipv4) end)
+
+      _ ->
+        {:error, :einval}
+    end
+  end
+
+  defp range_reduce_outer(lower, higher, acc \\ []) do
+    # check if `higher` isn't smaller then `lower`
+    case lower <= higher do
+      true ->
+        {new_acc, new_lower} = range_reduce_inner(lower, higher, 0, acc)
+        range_reduce_outer(new_lower, higher, new_acc)
+
+      false ->
+        acc
+    end
+  end
+
+  defp range_reduce_inner(lower, higher, step, acc)  do
+    outer_test = (lower ||| 1 <<< step) != lower
+    inner_test = (lower ||| 0xFFFFFFFF >>> ((32 - 1) - step)) > higher
+
+    case outer_test && !inner_test do
+      true -> range_reduce_inner(lower, higher, step + 1, acc)
+      false -> {acc ++ [{lower, 32 - step}], lower + (1 <<< step)}
+    end
+  end
 end
