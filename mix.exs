@@ -47,5 +47,4 @@ defmodule CIDR.Mixfile do
       }
     }
   end
-
 end

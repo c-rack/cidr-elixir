@@ -31,25 +31,25 @@ defmodule CIDRTest do
   end
 
   test "Parse 127.0.0.1" do
-    assert "127.0.0.1" |> CIDR.parse |> CIDR.is_cidr?
+    assert "127.0.0.1" |> CIDR.parse() |> CIDR.is_cidr?()
   end
 
   test "Parse 127.0.0.1/24" do
-    assert "127.0.0.1/24" |> CIDR.parse |> CIDR.is_cidr?
+    assert "127.0.0.1/24" |> CIDR.parse() |> CIDR.is_cidr?()
   end
 
   test "Do not parse ::1/256" do
-    assert "::1/256" |> CIDR.parse == {:error, "Invalid mask 256"}
+    assert "::1/256" |> CIDR.parse() == {:error, "Invalid mask 256"}
   end
 
   test "Start and end of IPv4 address range" do
-    cidr = "127.0.0.1/24" |> CIDR.parse
+    cidr = "127.0.0.1/24" |> CIDR.parse()
     assert cidr.first == {127, 0, 0, 0}
     assert cidr.last  == {127, 0, 0, 255}
   end
 
   test "Start and end of IPv6 address range" do
-    cidr = "::1/24" |> CIDR.parse
+    cidr = "::1/24" |> CIDR.parse()
     assert cidr.first == {0, 0, 0, 0, 0, 0, 0, 0}
     assert cidr.last  == {0, 255, 65535, 65535, 65535, 65535, 65535, 65535}
   end
@@ -98,8 +98,11 @@ defmodule CIDRTest do
   test "Match error handling" do
     cidr = CIDR.parse("1.2.3.4/24")
 
-    assert CIDR.match(cidr, {1,2,3,257}) == {:error, "Tuple is not a valid IP address"}
-    assert CIDR.match(cidr, {0, 0, 0, 0, 0, 0, 0, 100000}) == {:error, "Argument must be a binary or IP tuple of the same protocol"}
+    assert CIDR.match(cidr, {1, 2, 3, 257}) == {:error, "Tuple is not a valid IP address"}
+
+    assert CIDR.match(cidr, {0, 0, 0, 0, 0, 0, 0, 100_000}) ==
+             {:error, "Argument must be a binary or IP tuple of the same protocol"}
+
     assert CIDR.match(cidr, "This is not an IP") == {:error, :einval}
   end
 
@@ -107,11 +110,15 @@ defmodule CIDRTest do
     cidr = CIDR.parse("1.2.3.4/24")
 
     assert_raise ArgumentError, "Tuple is not a valid IP address", fn ->
-      CIDR.match!(cidr, {1,2,3,257})
+      CIDR.match!(cidr, {1, 2, 3, 257})
     end
-    assert_raise ArgumentError, "Argument must be a binary or IP tuple of the same protocol", fn ->
-      CIDR.match!(cidr, {0, 0, 0, 0, 0, 0, 0, 100000})
-    end
+
+    assert_raise ArgumentError,
+                 "Argument must be a binary or IP tuple of the same protocol",
+                 fn ->
+                   CIDR.match!(cidr, {0, 0, 0, 0, 0, 0, 0, 100_000})
+                 end
+
     assert_raise ArgumentError, fn ->
       CIDR.match!(cidr, "This is not an IP")
     end
@@ -119,19 +126,19 @@ defmodule CIDRTest do
 
   test "Match! without error" do
     cidr = CIDR.parse("1.2.3.4/24")
-    assert CIDR.match!(cidr, {1,2,3,4}) == true
-    assert CIDR.match!(cidr, {1,2,3,9}) == true
-    assert CIDR.match!(cidr, {2,2,2,2}) == false
+    assert CIDR.match!(cidr, {1, 2, 3, 4}) == true
+    assert CIDR.match!(cidr, {1, 2, 3, 9}) == true
+    assert CIDR.match!(cidr, {2, 2, 2, 2}) == false
   end
 
   test "Split IPv4" do
     cidr_list = CIDR.parse("1.0.0.0/24") |> CIDR.split(28) |> Enum.map(&(&1))
-    f = List.first cidr_list
+    f = List.first(cidr_list)
     assert f.first == {1, 0, 0, 0}
     assert f.last == {1, 0, 0, 15}
     assert f.hosts == 16
     assert f.mask == 28
-    f = List.last cidr_list
+    f = List.last(cidr_list)
     assert f.first == {1, 0, 0, 240}
     assert f.last == {1, 0, 0, 255}
     assert f.hosts == 16
@@ -141,32 +148,33 @@ defmodule CIDRTest do
 
   test "Split IPv6" do
     cidr_list = CIDR.parse("2001::/60") |> CIDR.split(64) |> Enum.map(&(&1))
-    f = List.first cidr_list
+    f = List.first(cidr_list)
     assert f.first == {8193, 0, 0, 0, 0, 0, 0, 0}
     assert f.last == {8193, 0, 0, 0, 65535, 65535, 65535, 65535}
-    assert f.hosts == 18446744073709551616
+    assert f.hosts == 18_446_744_073_709_551_616
     assert f.mask == 64
-    f = List.last cidr_list
+    f = List.last(cidr_list)
     assert f.first == {8193, 0, 0, 15, 0, 0, 0, 0}
     assert f.last == {8193, 0, 0, 15, 65535, 65535, 65535, 65535}
-    assert f.hosts == 18446744073709551616
+    assert f.hosts == 18_446_744_073_709_551_616
     assert f.mask == 64
     assert length(cidr_list) == 16
   end
 
   test "Split error" do
-    assert CIDR.parse("1.0.0.0/24") |> CIDR.split(23) == {:error, "New mask must be larger than existing cidr"}
+    assert CIDR.parse("1.0.0.0/24") |> CIDR.split(23) ==
+             {:error, "New mask must be larger than existing cidr"}
   end
 
   test "Hosts IPv4" do
-    host_list = CIDR.parse("1.0.0.0/24") |> CIDR.hosts |> Enum.map(&(&1))
+    host_list = CIDR.parse("1.0.0.0/24") |> CIDR.hosts() |> Enum.map(&(&1))
     assert List.first(host_list) == {1, 0, 0, 0}
     assert List.last(host_list) == {1, 0, 0, 255}
     assert length(host_list) == 256
   end
 
   test "Hosts IPv6" do
-    host_list = CIDR.parse("2001::/126") |> CIDR.hosts |> Enum.map(&(&1))
+    host_list = CIDR.parse("2001::/126") |> CIDR.hosts() |> Enum.map(&(&1))
     assert List.first(host_list) == {8193, 0, 0, 0, 0, 0, 0, 0}
     assert List.last(host_list) == {8193, 0, 0, 0, 0, 0, 0, 3}
     assert length(host_list) == 4
@@ -195,24 +203,31 @@ defmodule CIDRTest do
   end
 
   test "IPv4 Range" do
-    assert CIDR.parse_range("192.168.1.0") == %CIDR{first: {192, 168, 1, 0}, hosts: 1, last: {192, 168, 1, 0}, mask: 32}
+    assert CIDR.parse_range("192.168.1.0") == %CIDR{
+             first: {192, 168, 1, 0},
+             hosts: 1,
+             last: {192, 168, 1, 0},
+             mask: 32
+           }
+
     assert CIDR.parse_range("192.168.1.0-") == {:error, :einval}
     assert CIDR.parse_range("-192.168.1.0") == {:error, :einval}
+
     assert CIDR.parse_range("192.168.1.0-192.168.2.0") == [
-      %CIDR{first: {192, 168, 1, 0}, hosts: 256, last: {192, 168, 1, 255}, mask: 24},
-      %CIDR{first: {192, 168, 2, 0}, hosts: 1, last: {192, 168, 2, 0}, mask: 32}
-    ]
+             %CIDR{first: {192, 168, 1, 0}, hosts: 256, last: {192, 168, 1, 255}, mask: 24},
+             %CIDR{first: {192, 168, 2, 0}, hosts: 1, last: {192, 168, 2, 0}, mask: 32}
+           ]
+
     assert CIDR.parse_range("2001::/126") == %CIDR{
-      first: {8193, 0, 0, 0, 0, 0, 0, 0},
-      hosts: 4,
-      last: {8193, 0, 0, 0, 0, 0, 0, 3},
-      mask: 126
-    }
+             first: {8193, 0, 0, 0, 0, 0, 0, 0},
+             hosts: 4,
+             last: {8193, 0, 0, 0, 0, 0, 0, 3},
+             mask: 126
+           }
+
     assert CIDR.parse_range("192.168.1.0/32-192.168.2.0/32") == [
-      %CIDR{first: {192, 168, 1, 0}, hosts: 256, last: {192, 168, 1, 255}, mask: 24},
-      %CIDR{first: {192, 168, 2, 0}, hosts: 1, last: {192, 168, 2, 0}, mask: 32}
-    ]
+             %CIDR{first: {192, 168, 1, 0}, hosts: 256, last: {192, 168, 1, 255}, mask: 24},
+             %CIDR{first: {192, 168, 2, 0}, hosts: 1, last: {192, 168, 2, 0}, mask: 32}
+           ]
   end
-
 end
-
