@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 defmodule CIDR do
-  use Bitwise
+  import Bitwise
 
   @moduledoc """
   Classless Inter-Domain Routing (CIDR)
