@@ -235,11 +235,11 @@ defmodule CIDR do
   end
 
   # Validate that mask is valid
-  defp parse(address, mask) when tuple_size(address) == 4 and not (mask in 0..32) do
+  defp parse(address, mask) when tuple_size(address) == 4 and mask not in 0..32 do
     {:error, "Invalid mask #{mask}"}
   end
 
-  defp parse(address, mask) when tuple_size(address) == 8 and not (mask in 0..128) do
+  defp parse(address, mask) when tuple_size(address) == 8 and mask not in 0..128 do
     {:error, "Invalid mask #{mask}"}
   end
 
@@ -373,9 +373,9 @@ defmodule CIDR do
     end
   end
 
-  defp range_reduce_inner(lower, higher, step, acc)  do
+  defp range_reduce_inner(lower, higher, step, acc) do
     outer_test = (lower ||| 1 <<< step) != lower
-    inner_test = (lower ||| 0xFFFFFFFF >>> ((32 - 1) - step)) > higher
+    inner_test = (lower ||| 0xFFFFFFFF >>> (32 - 1 - step)) > higher
 
     case outer_test && !inner_test do
       true -> range_reduce_inner(lower, higher, step + 1, acc)
