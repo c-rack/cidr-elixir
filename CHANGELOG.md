@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2024-06-24
+
+- TODO
+
 ## [1.1.0] - 2017-06-12
 ### Added
 - Provide stream of hosts for a cidr range (@tehhobbit)
